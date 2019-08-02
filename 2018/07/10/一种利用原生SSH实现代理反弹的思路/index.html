@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>一种利用原生SSH实现代理反弹的思路 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>一种利用原生SSH实现代理反弹的思路</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年07月10日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#捣鼓" class='tag'>捣鼓</a>
+
+  <a href="/tags/#反向代理" class='tag'>反向代理</a>
+
+  <a href="/tags/#远程动态端口转发" class='tag'>远程动态端口转发</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月02日</time>
+          </div>
+          
+          <p>这两天闲来无事，翻看ssh的man pages，发现ssh的DESCRIPTION最后有一句很不起眼的话<code>X11 connections, arbitrary TCP ports and UNIX-domain sockets can also be forwarded over the secure channel.</code>意思就是可以做端口转发咯。再结合最近开会校园的网站只能从校园网或者连VPN才能访问，于是就想看看有没有办法突破一下。</p>
+<blockquote>
+<p>DESCRIPTION<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssh (SSH client) is a program for logging into a remote machine and for executing commands on a remote machine.  It is intended to provide secure encrypted communications between two untrusted hosts over an insecure network.  X11 connections, arbitrary TCP ports and UNIX-domain sockets can also be forwarded over the secure channel.</p>
+</blockquote>
+<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><p>由于做一些老师的项目，老师给了校内的两台虚拟主机，校内主机自然可以访问所有学校的网站，而且也是可以连通外网的。除此之外我还有一台腾讯云的1元云主机，可以连外网，连不上校内网，打算用这台作为代理跳板机。</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>是否能访问外网</th>
+<th>是否能访问内网</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>XMU VM 1</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>XMU VM 2</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>Cloud VM</td>
+<td>是</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<h1 id="思路整理"><a href="#思路整理" class="headerlink" title="思路整理"></a>思路整理</h1><p>想连上校内的网站，肯定要有一条和校内网的通路。可以开启一条SSH Tunnel来做到。数据可以经过加密在这条隧道来回穿梭。数据传过去还不行，我们需要访问到内网其他主机的资源，自然就需要一台类似于代理服务器的服务器。刚好SSH还有一个动态端口转发的功能，实则就是在SSH Server端实现了一个Socks的代理，然后再在本地做一个远程端口转发。于是利用远程端口转发+动态端口转发，理论上可以做到实现我不用VPN以及校园网访问校内网站的目的！</p>
+<h1 id="动手"><a href="#动手" class="headerlink" title="动手"></a>动手</h1><p>未方便表达，以下内容中，校园内的虚拟服务器称为host2，腾讯云称为host1。</p>
+<h2 id="Step-1-建立Socks服务"><a href="#Step-1-建立Socks服务" class="headerlink" title="Step 1 建立Socks服务"></a>Step 1 建立Socks服务</h2><p>先坐在寝室，连上VPN，登录host2。开启一个本地的动态端口转发，用它充当Socks代理。先看看参数介绍：</p>
+<blockquote>
+<p>-D [bind_address:]<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Specifies a local “dynamic” application-level port forwarding.  This works by allocating a socket to listen to port on the local side, optionally bound to the specified bind_address.  Whenever a connection is made to this port, the connection is forwarded over the secure channel,and the application protocol is then used to determine where to connect to from the remote machine.  Currently the SOCKS4 and SOCKS5 protocols are supported, and ssh will act as a SOCKS server.  Only root can forward privileged ports.  Dynamic port forwardings can also be specified in the configuration file.</p>
+</blockquote>
+<p>其中SSH Server填127.0.0.1，这样就可以实现本地动态端口转发，使得本地成为一个Socks代理。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -Nf -D 7001 root@127.0.0.1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>-N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not execute a remote command.  This is useful for just forwarding ports.<br>-f &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requests ssh to go to background just before command execution.  This is useful if ssh is going to ask for passwords or passphrases, but the user wants it in the background.</p>
+</blockquote>
+<p>这看起来很鸡肋，因为当浏览器设置localhost:7001为代理时，请求经过代理后却还是通过本地网卡发送出去，所以似乎没什么用。当然还没完。<br>值得一提的是，这样做了动态端口转发后的端口是暴露在公网上的，最起码同一网段的主机也可以配置使用这个代理。</p>
+<h2 id="Step-2-远程端口转发"><a href="#Step-2-远程端口转发" class="headerlink" title="Step 2 远程端口转发"></a>Step 2 远程端口转发</h2><p>继续在host2上操作，前面已经建立了一个本地的socks5代理服务，接着再建立一个远程端口转发，把本地的socks代理服务通过ssh tunnel发送到host1上。因为host2可以连上host1，而host1连不上host2，所以必须采用远程端口转发。关于远程端口转发与本地端口转发的区别，可以看<a href="https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/" target="_blank" rel="noopener">这里</a>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -Nf -R 8888:127.0.0.1:7001 mads@123.206.176.*</span><br></pre></td></tr></table></figure>
+<p>这样就打通了host1与host2，并且在host1上可以通过本地的8888端口访问host2的socks代理服务。到这里似乎一切都完成了，但实际配置之后发现访问不了。原因是目前只能在host1的本地访问host2的socks代理，所以还需要在host1上做一个本地端口转发把8888端口对应的服务暴露到公网上。</p>
+<h2 id="Step-3-本地端口转发"><a href="#Step-3-本地端口转发" class="headerlink" title="Step 3 本地端口转发"></a>Step 3 本地端口转发</h2><p>在host1上做本地端口转发</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -Nfg -L 6666:localhost:8888 mads@127.0.0.1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>-g &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Allows remote hosts to connect to local forwarded ports.  If used on a multiplexed connection, then this option must be specified on the master process.</p>
+</blockquote>
+<p>关键就是这个 -g 参数，从介绍可以知道他可以允许远程的主机访问本地转发的端口。<br>还有一个值得说的就是命令里面的localhost指的是相对于SSH Server，但这里都是host1。<br>这样所有工作完成。</p>
+<p>这时host2应该已经是监听了7001端口的Socks服务，以及监听了ssh tunnel的端口22。host1上有本地端口转发监听的6666端口以及远程端口转发开启的用于连接host2的socks服务的8888端口。</p>
+<p>这一套组合拳打下来，就实现了穿透内网的功能。如果ssh原本地动态端口转发叫做本地端口转发，那么我想叫这种方法为远程动态端口转发。</p>
+<h1 id="增强"><a href="#增强" class="headerlink" title="增强"></a>增强</h1><p>以上步骤都没问题，但是SSH提供的远程端口转发会超时自动关闭，所以需要写一个守护进程。也可以用一个现成的autossh代替ssh实现就行了。也可以用下面的脚本示例：</p>
+<ul>
+<li>revrocket.sh</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env bash</span></span><br><span class="line">ps aux | grep fsocks5 | grep -v grep | awk <span class="string">'&#123;print $2&#125;'</span> | xargs <span class="built_in">kill</span> -9 2&gt;/dev/null</span><br><span class="line">ps aux | grep 61080 | grep mads | awk <span class="string">'&#123;print $2&#125;'</span> | xargs <span class="built_in">kill</span> -9 2&gt;/dev/null</span><br><span class="line">bash /data/mads/fsocks5.sh &amp;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>fsocks5.sh</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># This script forward local socks5 port.</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  START=$(date +%s)</span><br><span class="line">  ssh -NTD 61080 root@127.0.0.1 &amp; 2&gt;/dev/null</span><br><span class="line">  ssh -NTR 61080:127.0.0.1:61080 -o ServerAliveInterval=10 -o ExitOnForwardFailure=yes mads@xxx 2&gt;/dev/null</span><br><span class="line">  END=$(date +%s)</span><br><span class="line">  DIFF=$(( <span class="variable">$END</span> - <span class="variable">$START</span> ))</span><br><span class="line">  <span class="keyword">if</span> (( <span class="variable">$DIFF</span> &lt; 3 ))</span><br><span class="line">  <span class="keyword">then</span></span><br><span class="line">    sleep 60</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p>然后再在系统的例行任务中加入此脚本，以实现开机启动啦～</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/bash</span></span><br><span class="line"><span class="comment"># centos</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"bash /data/mads/revrocket.sh"</span> &gt;&gt; /etc/rc.local</span><br></pre></td></tr></table></figure>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/linux/l-cn-sshforward/</a></p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>一种利用原生SSH实现代理反弹的思路</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/07/10 12:00:00</p>
+<p><span>更新时间：</span>2019/08/02 04:48:22</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/07/10/一种利用原生SSH实现代理反弹的思路/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#环境"><span class="toc-number">1.</span> <span class="toc-text">环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#思路整理"><span class="toc-number">2.</span> <span class="toc-text">思路整理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#动手"><span class="toc-number">3.</span> <span class="toc-text">动手</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-1-建立Socks服务"><span class="toc-number">3.1.</span> <span class="toc-text">Step 1 建立Socks服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-2-远程端口转发"><span class="toc-number">3.2.</span> <span class="toc-text">Step 2 远程端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-3-本地端口转发"><span class="toc-number">3.3.</span> <span class="toc-text">Step 3 本地端口转发</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#增强"><span class="toc-number">4.</span> <span class="toc-text">增强</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-number">5.</span> <span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

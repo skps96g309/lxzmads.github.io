@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link active">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='index'>
+  <div class="posts-list">
+    
+      <section>
+        <a href="/2019/04/23/通过CISCN2019一道SQL注入思考基于运行时错误的盲注/">
+          <h3 class='post-head'>
+            通过CISCN2019一道SQL注入思考基于运行时错误的盲注
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这次的CISCN WEB题感觉质量还不错。废话不多说，直接看题。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年04月23日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tag" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#SQL" class='tag'>SQL</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月02日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/04/11/西湖论剑2019一道XSS记录/">
+          <h3 class='post-head'>
+            西湖论剑2019一道XSS记录
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>通过复现这道题，觉得这么简单的题怎么当时没做出来，感觉自己状态是不对的。其实赛前觉得自己挺有信心的，现在看来应该是属于信心过头，变得有点傲慢了。而且比赛过程中并没有很坚持的去做题，总结一个字，”菜“。 记录这篇复现当作反思，常温习常警醒。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年04月11日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#Web安全" class='tag'>Web安全</a>
+
+  <a href="/tags/#XSS" class='tag'>XSS</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月11日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/04/10/XSS-Attack-Notes/">
+          <h3 class='post-head'>
+            XSS Attack Notes
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <h1 id="XSS检测"><a href="#XSS检测" class="headerlink" title="XSS检测"></a>XSS检测</h1><p>用于探测XSS的存在性。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年04月10日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#Web安全" class='tag'>Web安全</a>
+
+  <a href="/tags/#XSS" class='tag'>XSS</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月10日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/04/10/XSS-Concept-Notes/">
+          <h3 class='post-head'>
+            XSS Concept Notes
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>Web安全深似海，最近想稍微整理下之前扔到笔记堆里假装自己掌握了的其实从来没有翻过的Web安全文章，发现Web安全这一块真的知识点太多了。但是万事开头难，我还是想能把自己打CTF遇到的与Web安全相关的知识都做个梳理，为以后从事相关行业打下基础吧。这篇呢就是XSS三篇(Concept、Attack、Defense)三篇的第一篇。整理的很仓促，但我会慢慢的补充完善。内容以笔记的形式呈现，对于概念型的东西不啰嗦太多，但我会加个(我认为)比较好的对概念介绍的文章引用。大部分内容都整理自书本或者网上分享的文章，我会在后面加上Reference，侵删。有时候会夹杂点自己的想法，如有谬误欢迎评论区指正交流。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年04月10日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#Web安全" class='tag'>Web安全</a>
+
+  <a href="/tags/#XSS" class='tag'>XSS</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月10日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/04/05/月赛乙队题目记录-2019-04-05/">
+          <h3 class='post-head'>
+            月赛乙队题目记录-2019-04-05
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>被红队新进的两位大佬支配了。 这次做了两道pwn， 也还算有参与度把。感觉自己做题速度太慢了，可能也是不熟练的缘故，但更多的是感觉思路没有理的很好，这方面还需要注意总结与锻炼。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年04月05日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#月赛" class='tag'>月赛</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月05日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/03/28/浅谈利用SSH端口转发提高生产效率/">
+          <h3 class='post-head'>
+            浅谈利用SSH端口转发提高生产效率
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>丑话说在前，本文没有什么新颖前沿的知识介绍，用的都是几十年前用的技术。只是最近因为学业原因开始过上997的生活，在开发过程中总结出的一点提高生产率的感悟，想在这儿总结一下而已。</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年03月28日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tag" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#浅谈" class='tag'>浅谈</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月06日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/03/25/看雪CTF攻防战2019Q1两道pwn/">
+          <h3 class='post-head'>
+            看雪CTF攻防战2019Q1两道pwn
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>虽然毕设已经接近尾声而且感觉很凉, 但还是阻挡不了我做pwn题的决心啊. 参与了下看雪今年的CTF, 做出了pwn其中一道, 还有一道是赛后根据比赛的思路写出来了(fuck, 比赛思路是对的, 但是感觉自己打比赛时体力不太跟得上, 所以就没坚持下去, 还是要锻炼身体2333). 记录下思路与exp.</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年03月25日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年03月25日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/03/04/从零开刷PWNABLE.KR系列-random/">
+          <h3 class='post-head'>
+            从零开刷PWNABLE.KR系列-random
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <h1 id="random"><a href="#random" class="headerlink" title="random"></a>random</h1><p>Daddy, teach me how to use random value in programming!</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年03月04日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#PWNABLE.KR" class='tag'>PWNABLE.KR</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年03月25日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/02/27/从零开刷PWNABLE.KR系列-passcode/">
+          <h3 class='post-head'>
+            从零开刷PWNABLE.KR系列-passcode
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <h1 id="passcode"><a href="#passcode" class="headerlink" title="passcode"></a>passcode</h1><p>Mommy told me to make a passcode based login system.<br>My initial C code was compiled without any error!<br>Well, there was some compiler warning, but who cares about that?</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年02月27日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#PWNABLE.KR" class='tag'>PWNABLE.KR</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月27日</time>
+        </div>
+      </section>
+    
+      <section>
+        <a href="/2019/02/26/HGAME2019 WEEK-1 PWN PART 1/">
+          <h3 class='post-head'>
+            H-GAME WEEK-1 PWN PART 1
+          </h3>
+        </a>
+        
+        <div class="post-content">
+          
+            
+              
+                <p>今天在群里看到大佬们在讨论hgame的题目, 翻了翻发现题目难度还挺适合我这种萌新的, 于是刷了刷, 这里记录一下. 题目仓库在<a href="https://github.com/ly-test-fuzz/pwn_repo/tree/master/H-game" target="_blank" rel="noopener">这</a>.</p>
+              
+          
+        </div>
+        <div class='post-meta'>
+          <i class="fa fa-calendar"></i> <time>2019年02月26日</time>
+          
+          
+            <span class="seperator">|</span>
+             
+                <i class="fa fa-tags" aria-hidden="true"></i>
+              
+             
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#HGAME2019" class='tag'>HGAME2019</a>
+
+
+          
+          | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月26日</time>
+        </div>
+      </section>
+    
+  </div>
+  <aside>
+    
+    <div class="search">
+      <div class="content">
+        <form action="//www.google.com/search" target="_blank" class="search-form">
+          <input type="text" name="q" maxlength="20" placeholder=搜索>
+          <input type="hidden" name='sitesearch' value="http://lxzmads.github.io">
+        </form>
+      </div>
+    </div>
+    
+    
+    
+    
+  </aside>
+</main>
+
+  <div class="paging">
+  <div class="paging-container">
+    
+    <div></div>    
+    
+    
+    <div class='page-next'>
+      <a href="/page/2/">下一页</a>
+    </div>
+    
+  </div>
+</div>
+
+
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+
+</body>
+</html>

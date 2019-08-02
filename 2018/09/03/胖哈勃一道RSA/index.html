@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>胖哈勃一道RSA | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>胖哈勃一道RSA</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年09月03日</time>
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#RSA" class='tag'>RSA</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月17日</time>
+          </div>
+          
+          <p><a href="https://findneo.github.io/" target="_blank" rel="noopener">队友</a>推荐看看的一道题，因为没研究过RSA题= =，当时也就抱着看看的心态随便推了一下，后来Writeup出来之后发现竟然当时弄巧成拙推出的竟然是正确的结论。顺着“成功绝不是偶然的”的思路，在家里拿出纸又推了一遍。整个推理过程不是很严谨，但是是冲着寻找一个可能解的方向努力，现在贴出来，请有缘的看官雅正，聊博一笑。</p>
+<h1 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> gmpy</span><br><span class="line"><span class="keyword">from</span> Crypto.Util.number <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> secret <span class="keyword">import</span> x, y, flag</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> gmpy.is_prime(y) ** <span class="number">2016</span> + gmpy.is_prime(x+<span class="number">1</span>) ** <span class="number">2017</span> + ((x**<span class="number">2</span> - <span class="number">1</span>)**<span class="number">2</span> % (<span class="number">2</span>*x*y - <span class="number">1</span>) + <span class="number">2</span>) ** <span class="number">2018</span> == <span class="number">30097557298197417800049182668952226601954645169633891463401117760245367082644152355564014438095421962150109895432272944128252155287648477680131934943095113263121691874508742328500559321036238322775864636883202538152031804102118831278605474474352011895348919417742923873371980983336517409056008233804190890418285814476821890492630167665485823056526646050928460488168341721716361299816947722947465808004305806687049198633489997459201469227952552870291934919760829984421958853221330987033580524592596407485826446284220272614663464267135596497185086055090126893989371261962903295313304735911034185619611156742146</span></span><br><span class="line"></span><br><span class="line">p = gmpy.next_prime(x**<span class="number">3</span> + y**<span class="number">3</span>) <span class="comment">#(x+y)**3-3xy(x+y)</span></span><br><span class="line">q = gmpy.next_prime(x**<span class="number">2</span>*y + y**<span class="number">2</span>*x) <span class="comment">#xy(x+y)</span></span><br><span class="line">n = p * q</span><br><span class="line">phi = (p<span class="number">-1</span>)*(q<span class="number">-1</span>)</span><br><span class="line">d = gmpy.invert(<span class="number">0x10001</span>, phi)</span><br><span class="line">enc = pow(bytes_to_long(flag), <span class="number">0x10001</span>, n)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'n ='</span>, n</span><br><span class="line"><span class="keyword">print</span> <span class="string">'enc ='</span>, enc</span><br><span class="line"></span><br><span class="line"><span class="comment"># n = 260272753019642842691231717156206014402348296256668058656902033827190888150939144319270903947159599144884859205368557385941127216969379550487700198771513118894125094678559478972591331182960004648132846372455712958337042783083099376871113795475285658106058675217077803768944674144803250791799957440111855021945690877200606577646234107957498370758707097662736662439460472126493593605957225541979181422479704018055731221681621886820626215670393536343427267329350730257979042198593215747542270975288047196483958369426727778580292311145109908665004662296440533724591193527886702374790526322791818523938910660223971454070731594803459613066617828657725704376475527288174777197739360634209448477565044519733575375490101670974499385760735451471034271880800081246883157088501597655371430353965493264345172541221268942926210055390568364981514774743693528424196241142665685211916330254113610598390909248626686397970038848966187547231199741</span></span><br><span class="line"><span class="comment"># enc = 73933313646416156737449236838459526871566017180178176765840447023088664788672323530940171469589918772272559607026808711216932468486201094786991159096267208480969757088208089800600731106685561375522764783335332964711981392251568543122418192877756299395774738176188452197889668610818741062203831272066261677731889616150485770623945568369493256759711422067551058418926344060504112146971937651406886327429318390247733970549845424064244469193626197360072341969574784310397213033860597822010667926563087858301337091484951760613299203587677078666096526093414014637559237148644939541419075479462431789925219269815364529507771308181435591670281081465439913711912925412078002618729159141400730636976744132429329651487292506365655834202469178066850282850374067239317928012461993443785247524500680257923687511378073703423047348824611101206633407452837948194591695712958510124436821151767823443033286425729473563002691262316964646014201612</span></span><br></pre></td></tr></table></figure>
+<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p><img src="http://pics.madsome.one/rsa.jpg" alt="rsa"></p>
+<p>然后就可以根据<a href="https://mp.weixin.qq.com/s/3qvuVd9tBK3J-Q9vBMGxwA" target="_blank" rel="noopener">官网WP</a>的解题脚本进行爆破</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Show that if 4ab - 1 divides (4a**2 - 1)**2, then a = b.</span></span><br><span class="line"><span class="comment"># suppose y be a large prime and x + 1 is another large prime.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> gmpy</span><br><span class="line"><span class="keyword">from</span> Crypto.Util.number <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># from this condition with help of previous fact we can deduce that:</span></span><br><span class="line"><span class="comment"># ==&gt; we take 2a = x and b = y, so: 2xy - 1 | (x**2 - 1)**2 ==&gt; x = 2y</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># assert gmpy.is_prime(y) + gmpy.is_prime(x+1) + ((x**2 - 1)**2 % (2*x*y - 1) + 2) ** 2018 == 30097557298197417800049182668952226601954645169633891463401117760245367082644152355564014438095421962150109895432272944128252155287648477680131934943095113263121691874508742328500559321036238322775864636883202538152031804102118831278605474474352011895348919417742923873371980983336517409056008233804190890418285814476821890492630167665485823056526646050928460488168341721716361299816947722947465808004305806687049198633489997459201469227952552870291934919760829984421958853221330987033580524592596407485826446284220272614663464267135596497185086055090126893989371261962903295313304735911034185619611156742146 = 1 + 1 + 2 ** 2018</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># so we have x = 2y</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># p = gmpy.next_prime(x**3 + y**3) # ==&gt; p = gmpy.next_prime(8*y**3 + y**3) = gmpy.next_prime(9*y**3)</span></span><br><span class="line"><span class="comment"># q = gmpy.next_prime(x**2*y + y**2*x) # ==&gt; q = gmpy.next_prime(4*y**2*y + y**2*(2y)) = gmpy.next_prime(6*y**3)</span></span><br><span class="line"><span class="comment"># n = p * q # ==&gt; n = p * q ~= (9*y**3) * (6*y**3) = 54*y**6</span></span><br><span class="line"><span class="comment"># So we can factor n with knowing n ~= 54*y**6</span></span><br><span class="line"></span><br><span class="line">n = <span class="number">260272753019642842691231717156206014402348296256668058656902033827190888150939144319270903947159599144884859205368557385941127216969379550487700198771513118894125094678559478972591331182960004648132846372455712958337042783083099376871113795475285658106058675217077803768944674144803250791799957440111855021945690877200606577646234107957498370758707097662736662439460472126493593605957225541979181422479704018055731221681621886820626215670393536343427267329350730257979042198593215747542270975288047196483958369426727778580292311145109908665004662296440533724591193527886702374790526322791818523938910660223971454070731594803459613066617828657725704376475527288174777197739360634209448477565044519733575375490101670974499385760735451471034271880800081246883157088501597655371430353965493264345172541221268942926210055390568364981514774743693528424196241142665685211916330254113610598390909248626686397970038848966187547231199741</span></span><br><span class="line">enc = <span class="number">73933313646416156737449236838459526871566017180178176765840447023088664788672323530940171469589918772272559607026808711216932468486201094786991159096267208480969757088208089800600731106685561375522764783335332964711981392251568543122418192877756299395774738176188452197889668610818741062203831272066261677731889616150485770623945568369493256759711422067551058418926344060504112146971937651406886327429318390247733970549845424064244469193626197360072341969574784310397213033860597822010667926563087858301337091484951760613299203587677078666096526093414014637559237148644939541419075479462431789925219269815364529507771308181435591670281081465439913711912925412078002618729159141400730636976744132429329651487292506365655834202469178066850282850374067239317928012461993443785247524500680257923687511378073703423047348824611101206633407452837948194591695712958510124436821151767823443033286425729473563002691262316964646014201612</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># now we calculate the 5th root of n//45 to find the y:</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">iroot</span><span class="params">(k, n)</span>:</span></span><br><span class="line">   UB = <span class="number">1</span></span><br><span class="line">   <span class="keyword">while</span> pow(UB, k) &lt; n:</span><br><span class="line">       UB *= <span class="number">2</span></span><br><span class="line">   LB = UB / <span class="number">2</span></span><br><span class="line">   <span class="keyword">while</span> UB - LB &gt; <span class="number">1</span>:</span><br><span class="line">       M = (LB + UB) // <span class="number">2</span></span><br><span class="line">       midToK = pow(M, k)</span><br><span class="line">       <span class="keyword">if</span> midToK &lt; n:</span><br><span class="line">           LB = M</span><br><span class="line">       <span class="keyword">elif</span> n &lt; midToK:</span><br><span class="line">           UB = M</span><br><span class="line">       <span class="keyword">else</span>:</span><br><span class="line">           <span class="keyword">return</span> M</span><br><span class="line">   <span class="keyword">if</span> pow(UB, k) == n:</span><br><span class="line">       <span class="keyword">return</span> UB</span><br><span class="line">   <span class="keyword">else</span>:</span><br><span class="line">       <span class="keyword">return</span> LB</span><br><span class="line"></span><br><span class="line">y = iroot(<span class="number">6</span>, n // <span class="number">54</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">   <span class="keyword">if</span> gmpy.is_prime(y):</span><br><span class="line">       <span class="keyword">if</span> gmpy.next_prime(<span class="number">9</span>*y**<span class="number">3</span>) * gmpy.next_prime(<span class="number">6</span>*y**<span class="number">3</span>) == n:</span><br><span class="line">           <span class="keyword">print</span> <span class="string">'Found:'</span>, <span class="string">'y ='</span>, y</span><br><span class="line">           <span class="keyword">break</span></span><br><span class="line">   <span class="keyword">else</span>:</span><br><span class="line">       y += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">x = <span class="number">2</span>*y</span><br><span class="line">p = gmpy.next_prime(x**<span class="number">3</span> + y**<span class="number">3</span>)</span><br><span class="line">q = gmpy.next_prime(x**<span class="number">2</span>*y + y**<span class="number">2</span>*x)</span><br><span class="line">n = p * q</span><br><span class="line">phi = (p<span class="number">-1</span>)*(q<span class="number">-1</span>)</span><br><span class="line">d = gmpy.invert(<span class="number">0x10001</span>, phi)</span><br><span class="line">flag = long_to_bytes(pow(enc, d, n))</span><br><span class="line"><span class="keyword">print</span> <span class="string">'flag ='</span>, flag</span><br></pre></td></tr></table></figure>
+<p>若本地没有gmpy库，可以参考<a href="https://findneo.github.io/180903-pwnhub-lhy/" target="_blank" rel="noopener">队友的脚本</a>.</p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>胖哈勃一道RSA</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/09/03 12:00:00</p>
+<p><span>更新时间：</span>2019/02/17 04:05:38</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/09/03/胖哈勃一道RSA/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#题目"><span class="toc-number">1.</span> <span class="toc-text">题目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#思路"><span class="toc-number">2.</span> <span class="toc-text">思路</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

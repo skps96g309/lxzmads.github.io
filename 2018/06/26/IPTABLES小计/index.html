@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>IPTABLES 小计 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>IPTABLES 小计</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年06月26日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#Linux" class='tag'>Linux</a>
+
+  <a href="/tags/#iptables" class='tag'>iptables</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月01日</time>
+          </div>
+          
+          <p>写这篇小计的原因呢，主要是在学校做项目或者自己在Linux服务器搭点什么服务的时候，总是因为各种原因Unreachable，并且找了半天原因最终发现是Linux的防火墙策略导致。之前都是稀里糊涂的为了服务赶紧上线，登录某某云控制台或者复制网上的代码修改服务器的防火墙策略，但总感觉不是办法。趁现在有点时间，就打算看个明白，顺便写个小计记录一下方便快速复习。</p>
+<blockquote>
+<p>Update: 2019-03-29<br>最近做毕设搭建docker网络的时候又要用到iptables，回头看到以前写过的小计感觉写的不是很清楚，于是更新一下。</p>
+</blockquote>
+<h1 id="何为？"><a href="#何为？" class="headerlink" title="何为？"></a>何为？</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>iptables是运行在Linux用户空间的工具，通过它可以修改运行在内核空间的防火墙模块Netfilter的配置，从而达到配置Linux防火墙策略的目的。所以Netfilter才是Linux真正的防火墙模块，而iptables只是与模块交互的前端工具，而且iptables只是针对IPv4报文的。类似的ip6tables(IPv6)、arptables(ARP)、ebtables(Ethernet Frame)这里不做介绍。</p>
+<blockquote>
+<p>Update: iptables新版本的部分表是支持IPv6的了。这里说它是前端工具并不妥当，它严格个说可以是个利用netfilter framework的hook机制实现的防火墙软件</p>
+</blockquote>
+<h2 id="Tables"><a href="#Tables" class="headerlink" title="Tables"></a>Tables</h2><p>前面说到iptables修改的是内核空间模块Netfilter的配置文件，这些配置文件称为Tables。Tables一共有5张，分别对应着5个Netfilter的子模块(按优先级)：</p>
+<blockquote>
+<p>Update: 其实tables是iptables的配置文件。tables其实就是对应于你想做什么（organized by area of concern），而Chain对应于什么时候做。Chain和内核中Netfilte的5个hook是一一对应的。</p>
+</blockquote>
+<ul>
+<li>PREROUTING: Triggered by the NF_IP_PRE_ROUTING hook.</li>
+<li>INPUT: Triggered by the NF_IP_LOCAL_IN hook.</li>
+<li>FORWARD: Triggered by the NF_IP_FORWARD hook.</li>
+<li>OUTPUT: Triggered by the NF_IP_LOCAL_OUT hook.</li>
+<li><p>POSTROUTING: Triggered by the NF_IP_POST_ROUTING hook.</p>
+</li>
+<li><p>iptables_raw 模块，对应的是raw表。优先级最高，主要用途是结合NOTRACK target避免<a href="https://en.wikipedia.org/wiki/Netfilter" target="_blank" rel="noopener">Connection Tracking</a>。target的含义见下文。</p>
+</li>
+<li>iptables_mangle 模块，对应mangle表。用于修改定义修改数据包的规则。它作用在Connection Tracking之后。</li>
+<li>iptables_nat 模块，对应nat表。主要用于NAT转换，而不是为了过滤目的。</li>
+<li>iptables_filter 模块，对应filter表。用于常规的过滤规则。</li>
+<li>security_filter 模块，对应security表。用于定义安全规则。</li>
+</ul>
+<p><del>这些模块按照一定的优先级对传入本机的数据包按照对应的表中的规则进行过滤、转发。那么这些表中的内容是什么样子呢？</del></p>
+<p><del>其实各个表又包含了不同的子模块，这些子模块称为Chain。其实Tables和Chain是<strong>n-n</strong>的关系。下面介绍Chain。</del></p>
+<h2 id="Chain"><a href="#Chain" class="headerlink" title="Chain"></a>Chain</h2><p>Chain是Rules的Chain，那么Rules是什么呢？Rules就是一系列的Rule，Rule包含数据包的匹配条件和匹配结果，即“满足什么样条件的数据包怎么处理”。而一系列这样的Rule按照链组织起来，就是一个Chain。Linux内核中有<strong>五条</strong>预定义的Chain，分别是：</p>
+<ul>
+<li>PREROUTING：数据包从网卡传入缓存中后路由（判断IP地址是否是本机）之前的数据包经过这条链。</li>
+<li>INPUT：路由后IP地址是本机，即将交给应用层socket的数据包经过这条链。</li>
+<li>FORWARD：路由后IP地址不是本机的数据包经过此链。</li>
+<li>OUTPUT：从本机socket发出的数据包经过此链。</li>
+<li>POSTROUTING：即将交给网卡发送出去的数据包经过此链。</li>
+</ul>
+<p>除了这五条预定义的Chain之外，用户可以定义任意条自己的Chain。</p>
+<p>前面提到Rule包含一个Target，这个Target可以是跳转用户自己定义的Chain，或者是特殊的Target(ACCEPT, DROP, RETURN)，或者是Target的取值集合（man iptables-extensions）。预定义的5条链都有默认的一个<strong>policy Target</strong>，都是<strong>ACCEPT</strong>。数据包经过Chain时，会从第一条Rule开始匹配，如果不匹配交给下一个Rule，如果到达Chain尾，就按默认的policy Target处理。如果匹配了就按Rule中的Target处理。关于各个Target的作用详细的看iptables-extensions的manpage。</p>
+<p>Chain可以为空(默认情况)，数据包通过本机最起码经过<strong>一条</strong>Chain。</p>
+<blockquote>
+<p>Update: netfilter的hook只有五个，但是会有多个表的Chain注册到一个hook，所以需要提供一个hook优先级来确定hook执行顺序。</p>
+</blockquote>
+<h2 id="Target-记录"><a href="#Target-记录" class="headerlink" title="Target 记录"></a>Target 记录</h2><p>最近被一个问题困扰了好久，最终还是解决了。 问题就是，我在一台有一张无线网卡的Ubuntu台式机<code>vs</code>上开了个热点，然后再在<code>vs</code>上开个<code>nginx</code>docker映射<code>80</code>端口到<code>vs</code>的<code>8888</code>，发现台式机热点的局域网内访问docker的话，nginx访问日志里记录的都是<code>172.x.0.1</code>，也就是docker网关的ip。</p>
+<p>问题所在： Ubuntu开热点时在iptables的nat表中添加了下面这样一条规则导致：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-A POSTROUTING -s 10.42.0.0/24 ! -d 10.42.0.0/24 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+<p>具体原理日后有时间专门写一篇8。</p>
+<h1 id="如何？"><a href="#如何？" class="headerlink" title="如何？"></a>如何？</h1><p>说了这么多原理，该是实作的时候了。其实iptables的用法在man pages里面写的很清楚了，可以去翻阅学习。这里记录下一些常用的做法。</p>
+<h2 id="只开放指定端口"><a href="#只开放指定端口" class="headerlink" title="只开放指定端口"></a>只开放指定端口</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">iptables -F</span><br><span class="line">iptables -I INPUT -i lo -j ACCEPT <span class="comment"># 允许本机访问本机</span></span><br><span class="line">iptables -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT <span class="comment"># 允许本机访问外部网络</span></span><br><span class="line">iptables -I INPUT -p tcp --dport 80 -j ACCEPT <span class="comment"># http</span></span><br><span class="line">iptables -I INPUT -p tcp --dport 443 -j ACCEPT <span class="comment"># https</span></span><br><span class="line">iptables -I INPUT -p tcp --dport 2333 -j ACCEPT <span class="comment"># ssr-.-</span></span><br><span class="line">iptables -I INPUT -p tcp --dport 10:21 -j ACCEPT <span class="comment"># 常见系统服务端口</span></span><br><span class="line">iptables -I INPUT -p tcp --dport 22 -j ACCEPT <span class="comment"># ssh</span></span><br><span class="line">iptables -I INPUT -p icmp -j ACCEPT <span class="comment"># 允许ping</span></span><br><span class="line">iptables -A INPUT -j REJECT <span class="comment"># 拒绝所有其他端口</span></span><br></pre></td></tr></table></figure>
+<h2 id="防止SYN洪水攻击"><a href="#防止SYN洪水攻击" class="headerlink" title="防止SYN洪水攻击"></a>防止SYN洪水攻击</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -p tcp --syn --dport 80 -m connlimit --connlimit-above 100 -j REJECT</span><br></pre></td></tr></table></figure>
+<h2 id="防止DDOS攻击"><a href="#防止DDOS攻击" class="headerlink" title="防止DDOS攻击"></a>防止DDOS攻击</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 并发请求限制</span><br><span class="line">iptables -I INPUT -p tcp --dport 80 -s 10.10.10.1 -m connlimit --connlimit-above 10 -j REJECT</span><br><span class="line"># limit模块，限速控制异常流量</span><br><span class="line">iptables -A INPUT -p icmp -m limit --limit 3/hour --limit-burst 10 -j ACCEPT</span><br><span class="line">iptables -A INPUT -p icmp -j REJECT</span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://en.wikipedia.org/wiki/Netfilter" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Netfilter</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Iptables" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Iptables</a></p>
+<p><a href="https://www.jianshu.com/p/fbadb784bc16" target="_blank" rel="noopener">https://www.jianshu.com/p/fbadb784bc16</a></p>
+<p><a href="https://www.digitalocean.com/community/tutorials/a-deep-dive-into-iptables-and-netfilter-architecture" target="_blank" rel="noopener">https://www.digitalocean.com/community/tutorials/a-deep-dive-into-iptables-and-netfilter-architecture</a></p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>IPTABLES 小计</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/06/26 12:00:00</p>
+<p><span>更新时间：</span>2019/04/01 09:56:51</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/06/26/IPTABLES小计/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#何为？"><span class="toc-number">1.</span> <span class="toc-text">何为？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念"><span class="toc-number">1.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tables"><span class="toc-number">1.2.</span> <span class="toc-text">Tables</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Chain"><span class="toc-number">1.3.</span> <span class="toc-text">Chain</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Target-记录"><span class="toc-number">1.4.</span> <span class="toc-text">Target 记录</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#如何？"><span class="toc-number">2.</span> <span class="toc-text">如何？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#只开放指定端口"><span class="toc-number">2.1.</span> <span class="toc-text">只开放指定端口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#防止SYN洪水攻击"><span class="toc-number">2.2.</span> <span class="toc-text">防止SYN洪水攻击</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#防止DDOS攻击"><span class="toc-number">2.3.</span> <span class="toc-text">防止DDOS攻击</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#References"><span class="toc-number">3.</span> <span class="toc-text">References</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

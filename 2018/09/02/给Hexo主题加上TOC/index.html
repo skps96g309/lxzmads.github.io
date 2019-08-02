@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>给Hexo主题加上TOC | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>给Hexo主题加上TOC</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年09月02日</time>
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#捣鼓" class='tag'>捣鼓</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月17日</time>
+          </div>
+          
+          <h1 id="废话"><a href="#废话" class="headerlink" title="废话"></a>废话</h1><p>博客从大一就搭了，方案从github pages+hexo换到WordPress再到现在hexo+vultr，但博客却一直没有时间写。当初搭博客时候就是为了分享点自己的一些想法，希望能够在网上结识到志同道合的人。然而现实的情况却是忙的不可开交，从大二下开始准备保研之后，几乎所有涉及到保研的事项一个都不敢懈怠，除了课程考试外，还有课程设计、各种比赛以及一些项目。当然只做到热爱学习可不行，还要保证身体吃得消，因为体育课也不能挂科啊T.T。可能是理所当然，但一定是雪上加霜的是因为太过忙碌的原因在大二下期末考试周时候生了一场很严重的感冒，从那之后很多年没犯的鼻炎又复发，到现在都还没怎么痊愈。说实话这非常影响我的正常学习生活，两个夏天，晚上睡觉时候空调都不敢彻夜开着，因为第二天起来会受不了，对此我非常感谢宽宏大量的舍友的不杀之恩。这么拼，还不是因为大一的成绩实在太差，如果不抓住最后的尾巴那么保研无望。幸运的是靠着身边人的帮助以及自己的努力，最终还是抓住了保研的尾巴。我非常感恩在XMU遇到的每个人，我非常喜欢XMU，XMU的景色、XMU的食堂以及XMU的人我不会忘记。然而我还年轻，我想去960万平方公里的其他地方看看。</p>
+<p>QAQ说了这么多，绝不是就是想找一个拖了三年没写博客的借口。有一句话说的好，“写博客最好的时间有两个，一个是十年前，另一个就是现在”，所以趁着大四的时间，我可以用现在好好理一理自己的过去，畅想自己的未来，并用博客将这些记录下来。</p>
+<p>那就从现在开始吧！</p>
+<h1 id="主题选择"><a href="#主题选择" class="headerlink" title="主题选择"></a>主题选择</h1><p>从<a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo官网</a>选择了一款看起来很简洁的主题PolarBear。从一开始喜欢花里胡哨再到喜欢扁平化的天蓝色风格，最终选择白底黑字的风格，这就像我心境的变化吧。(你不要想我是为了节约流量)但是唯一不满意的地方就是这个主题的文章右边没有TOC目录，这让我这种非常注重用户体验的程序员非常不满。想了想Hexo主题都是开源的，应该可以改一改吧~</p>
+<h1 id="动手"><a href="#动手" class="headerlink" title="动手"></a>动手</h1><h2 id="RTFM"><a href="#RTFM" class="headerlink" title="RTFM"></a>RTFM</h2><p>从以往hack的经验看，与其去Google搜索各种解决方案，然后一个个实验那些早已被版本抛弃的方法来浪费时间，还不如去RTFM。于是打开<a href="https://hexo.io/zh-cn/docs" target="_blank" rel="noopener">https://hexo.io/zh-cn/docs</a>，搜索<code>TOC</code>，在辅助函数看到一个可以自动生成TOC目录的辅助函数<code>toc(str, [options])</code>。所以现在想法就很简单了，直接在Hexo主题的post模板文件中添加一个node，然后设置适当的css就可以啦~</p>
+<h2 id="审计主题源代码"><a href="#审计主题源代码" class="headerlink" title="审计主题源代码"></a>审计主题源代码</h2><p>寻找了一番，在<code>polarbear/layout/</code>目录下发现了主题的各种模板文件，都是<code>swig</code>模板引擎写的，语法也不复杂，浏览了几个文件大概就知道语法规则了。发现了<code>post.swig</code>文件，先打开看看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &quot;_layout.swig&quot; %&#125;</span><br><span class="line">&#123;% import &apos;_macro/post.swig&apos; as post_template %&#125;</span><br><span class="line">&#123;% block title %&#125; &#123;&#123; page.title &#125;&#125; - &#123;&#123; config.title &#125;&#125; &#123;% endblock %&#125;</span><br><span class="line">%&gt;</span><br><span class="line">&#123;% block content %&#125;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;primary&quot;&gt;</span><br><span class="line">        &#123;&#123; post_template.render(page) &#125;&#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&#123;% endblock %&#125;</span><br></pre></td></tr></table></figure>
+<p>可以发现导入了<code>_macro/post.swig</code>文件，从<code>render()</code>函数猜想这个文件应该是一个post的模板，大概就是从<code>page</code>和<code>config</code>来获取页面标题并显示，至于<code>page</code>和<code>config</code>是什么其实我并不关心，我猜想就是个类似于全局变量的东西，然后从名字就可以猜出有什么作用了。之后就是构造一些div结点来组织页面内容，利用导入的<code>post_template</code>来渲染页面内容。我们还可以发现<code>swig</code>中内容都是用<code> {% block * %} * {% endblock %} </code>的方式申明的，并且可以在<code>{{ }}</code>中写js语句。学习了一波<code>swig</code>语法~</p>
+<p>所以比较关键的就是<code>_macro/post.swig</code>文件，我们跟进去看一下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">&#123;% macro render(post) %&#125;</span><br><span class="line">  &lt;article class=&quot;post&quot;&gt;</span><br><span class="line">    &lt;header class=&quot;post-header&quot;&gt;</span><br><span class="line">      &lt;h1 class=&quot;post-title&quot;&gt;</span><br><span class="line">        &#123;% if is_home() %&#125;</span><br><span class="line">          &lt;a class=&quot;post-link&quot; href=&quot;&#123;&#123; url_for(post.path) &#125;&#125;&quot;&gt;&#123;&#123; post.title &#125;&#125;&lt;/a&gt;</span><br><span class="line">        &#123;% else %&#125;</span><br><span class="line">          &#123;&#123; post.title &#125;&#125;</span><br><span class="line">        &#123;% endif %&#125;</span><br><span class="line">      &lt;/h1&gt;</span><br><span class="line"></span><br><span class="line">      &lt;time class=&quot;post-time&quot;&gt;</span><br><span class="line">          &#123;&#123; full_date(post.date, &apos;MMM DD YYYY&apos;) &#125;&#125;</span><br><span class="line">      &lt;/time&gt;</span><br><span class="line">    &lt;/header&gt;</span><br><span class="line"></span><br><span class="line">    &#123;% if is_home() %&#125;</span><br><span class="line">        &lt;div class=&quot;post-excerpt&quot;&gt;</span><br><span class="line">            &#123;% set excerpt = &quot;&quot; %&#125;</span><br><span class="line">            &#123;% if post.description %&#125;</span><br><span class="line">              &#123;% set excerpt = post.description %&#125;</span><br><span class="line">            &#123;% elif post.excerpt %&#125;</span><br><span class="line">              &#123;% set excerpt = post.excerpt %&#125;</span><br><span class="line">            &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">            &#123;% if excerpt %&#125;</span><br><span class="line">              &#123;&#123; excerpt &#125;&#125;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">            &#123;% endif %&#125;</span><br><span class="line">          &#123;% else %&#125;</span><br><span class="line">            &lt;div class=&quot;post-content&quot;&gt;</span><br><span class="line">            &#123;&#123; post.content &#125;&#125;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">          &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">    &#123;% if not is_home() %&#125;</span><br><span class="line">      &lt;footer class=&quot;post-footer&quot;&gt;</span><br><span class="line">                &#123;% if post.tags and post.tags.length %&#125;</span><br><span class="line">                &lt;div class=&quot;post-tags&quot;&gt;</span><br><span class="line">                  &#123;% for tag in post.tags %&#125;</span><br><span class="line">                        &lt;a href=&quot;&#123;&#123; url_for(tag.path) &#125;&#125;&quot;&gt;&#123;&#123; tag.name &#125;&#125;&lt;/a&gt;</span><br><span class="line">                  &#123;% endfor %&#125;</span><br><span class="line">                &lt;/div&gt;</span><br><span class="line">                &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">        &#123;# Post Pagination #&#125;</span><br><span class="line">        &#123;% include &quot;../_partial/pagination.swig&quot; %&#125;</span><br><span class="line">        &#123;% include &quot;../_partial/comments.swig&quot; %&#125;</span><br><span class="line">      &lt;/footer&gt;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">  &lt;/article&gt;</span><br><span class="line">&#123;% endmacro %&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出这果然就是个渲染post的模板，其中<code>{% if not is_home() %}</code>值得我们注意，大概分析下就是主页的<code>post</code>目录和<code>post</code>的具体内容的渲染都是通过这个模板文件渲染的，然后通过这个if语句来识别不同的上下文。大概渲染逻辑搞明白了，按照之前的思路，我们还需要寻找css文件的位置。在主题的source目录发现<code>_layout.scss</code>，使用<code>scss</code>写的</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#content</span> &#123;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="variable">$global-content-margin</span>;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">90%</span>;</span><br><span class="line">        <span class="attribute">max-width</span>: <span class="variable">$global-body-width</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-id">#primary</span><span class="selector-class">.home</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">73%</span>;</span><br><span class="line">    <span class="attribute">float</span>: left;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-id">#primary</span> &#123;</span><br><span class="line">    <span class="attribute">max-width</span>: <span class="number">850px</span>;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="variable">$global-content-margin</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@<span class="keyword">include</span> max-screen() &#123;</span><br><span class="line">  <span class="selector-class">.site-header-inner</span>, <span class="selector-class">.content</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">90%</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="selector-id">#secondary</span> &#123;</span><br><span class="line">      <span class="attribute">display</span>: none;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="selector-id">#primary</span><span class="selector-class">.home</span> &#123;</span><br><span class="line">      <span class="attribute">width</span>: <span class="number">100%</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到id为<code>primary</code>的大容器的css样式定义在这里，接下来就可以动手了！</p>
+<h2 id="修改主题源码"><a href="#修改主题源码" class="headerlink" title="修改主题源码"></a>修改主题源码</h2><h3 id="增加TOC"><a href="#增加TOC" class="headerlink" title="增加TOC"></a>增加TOC</h3><p>我觉得TOC目录应该也是属于post的内容的一部分，于是就在<code>layout/_macro/post.swig</code>文件尾部添加了toc函数，这里注意官网给的是<code>ejs</code>的语法样例，我们要按照<code>swig</code>的语法来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">&#123;% if not is_home() and toc(page.content, &#123;class: &apos;post-test&apos;&#125;) !== &apos;&apos; %&#125;</span><br><span class="line">    &#123;% block toc %&#125;</span><br><span class="line">        &lt;div class=&quot;toc-container&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;toc-article&quot;&gt;</span><br><span class="line">                &#123;&#123; toc(page.content, &#123;</span><br><span class="line">                    class: &apos;post-poc&apos;,</span><br><span class="line">                    list_number: false</span><br><span class="line">                &#125;)&#125;&#125;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">    &#123;% endblock %&#125;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="调整TOC样式"><a href="#调整TOC样式" class="headerlink" title="调整TOC样式"></a>调整TOC样式</h3><p>添加完toc目录还不够，我们还需要修改css来调整toc的位置。<br>因为主题原本的主页和post页面都是包含在id为<code>primary</code>的大容器里面，通过<code>class=&quot;home&quot;</code>来调整主页不同的样式。我们模仿一下，在post的容器增加一个<code>class=&quot;post-container&quot;</code>来方便调整toc的样式。修改<code>layout/post.swig</code>如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &quot;_layout.swig&quot; %&#125;</span><br><span class="line">&#123;% import &apos;_macro/post.swig&apos; as post_template %&#125;</span><br><span class="line">&#123;% block title %&#125; &#123;&#123; page.title &#125;&#125; - &#123;&#123; config.title &#125;&#125; &#123;% endblock %&#125;</span><br><span class="line">%&gt;</span><br><span class="line">&#123;% block content %&#125;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;primary&quot; class=&quot;post-container&quot;&gt;</span><br><span class="line">        &#123;&#123; post_template.render(page) &#125;&#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&#123;% endblock %&#125;</span><br></pre></td></tr></table></figure>
+<p>再调整toc的位置，在<code>source/css/_layout.scss</code>中添加如下代码</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#primary</span><span class="selector-class">.post-container</span>&#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">73%</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后再调整<code>toc</code>本身的样式，在<code>source/css/_partial/_post.scss</code>中添加如下</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.toc-container</span> <span class="selector-class">.toc-article</span>&#123;</span><br><span class="line">  <span class="attribute">display</span>: block;</span><br><span class="line">  <span class="attribute">position</span>: fixed;</span><br><span class="line">  <span class="attribute">margin-left</span>: <span class="number">15px</span>;</span><br><span class="line">  <span class="attribute">background-color</span>: <span class="number">#f6f6f6</span>;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">10px</span>;</span><br><span class="line">  <span class="attribute">overflow-x</span>: auto;</span><br><span class="line">  <span class="attribute">overflow-y</span>: auto;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">12px</span>;</span><br><span class="line">  <span class="attribute">top</span>: <span class="number">25%</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">200px</span>;</span><br><span class="line">  <span class="attribute">padding-bottom</span>: <span class="number">40px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-tag">ol</span><span class="selector-class">.post-poc</span>&#123;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">padding-left</span>: <span class="number">15px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-tag">ol</span><span class="selector-class">.post-poc-child</span>&#123;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">padding-left</span>: <span class="number">15px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>OK至此就大功告成啦~效果就像这篇博客的这种~。</p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>给Hexo主题加上TOC</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/09/02 12:00:00</p>
+<p><span>更新时间：</span>2019/02/17 04:05:38</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/09/02/给Hexo主题加上TOC/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#废话"><span class="toc-number">1.</span> <span class="toc-text">废话</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#主题选择"><span class="toc-number">2.</span> <span class="toc-text">主题选择</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#动手"><span class="toc-number">3.</span> <span class="toc-text">动手</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RTFM"><span class="toc-number">3.1.</span> <span class="toc-text">RTFM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#审计主题源代码"><span class="toc-number">3.2.</span> <span class="toc-text">审计主题源代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改主题源码"><span class="toc-number">3.3.</span> <span class="toc-text">修改主题源码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#增加TOC"><span class="toc-number">3.3.1.</span> <span class="toc-text">增加TOC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调整TOC样式"><span class="toc-number">3.3.2.</span> <span class="toc-text">调整TOC样式</span></a></li></ol></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

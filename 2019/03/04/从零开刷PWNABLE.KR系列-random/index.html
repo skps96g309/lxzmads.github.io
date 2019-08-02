@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>从零开刷PWNABLE.KR系列-random | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>从零开刷PWNABLE.KR系列-random</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年03月04日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#PWNABLE.KR" class='tag'>PWNABLE.KR</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年03月25日</time>
+          </div>
+          
+          <h1 id="random"><a href="#random" class="headerlink" title="random"></a>random</h1><p>Daddy, teach me how to use random value in programming!</p>
+<p>ssh <a href="mailto:random@pwnable.kr" target="_blank" rel="noopener">random@pwnable.kr</a> -p2222 (pw:guest)</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p>常规检查.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[*] <span class="string">'/home/random/random'</span></span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE</span><br></pre></td></tr></table></figure>
+<p>同样给了源代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> random;</span><br><span class="line">	random = rand();	<span class="comment">// random value!</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> key=<span class="number">0</span>;</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;key);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span>( (key ^ random) == <span class="number">0xdeadbeef</span> )&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Good!\n"</span>);</span><br><span class="line">		system(<span class="string">"/bin/cat flag"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Wrong, maybe you should try 2^32 cases.\n"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出是<code>rand</code>函数的误用, 看看<code>man pages</code>怎么说,</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">DESCRIPTION</span><br><span class="line">       The rand() function returns a pseudo-random integer in the range 0 to RAND_MAX inclusive (i.e., the mathemati‐</span><br><span class="line">       cal range [0, RAND_MAX]).</span><br><span class="line"></span><br><span class="line">       The srand() function sets its argument as the seed for a new sequence of pseudo-random integers to be returned</span><br><span class="line">       by rand().  These sequences are repeatable by calling srand() with the same seed value.</span><br><span class="line"></span><br><span class="line">       **If no seed value is provided, the rand() function is automatically seeded with a value of 1**.</span><br></pre></td></tr></table></figure>
+<p>所以我们写个小程序就能获得<code>random</code>的值了, 之后就不细说.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d\n"</span>, <span class="number">0xdeadbeef</span> ^ rand());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Mommy, I thought libc random is unpredictable... */</span></span><br></pre></td></tr></table></figure>
+<h1 id="input"><a href="#input" class="headerlink" title="input"></a>input</h1><p>Mom? how can I pass my input to a computer program?</p>
+<p>ssh <a href="mailto:input2@pwnable.kr" target="_blank" rel="noopener">input2@pwnable.kr</a> -p2222 (pw:guest)</p>
+<h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h2><p>常规检查</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>源码如下, 可以看出是道编程题…<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[], <span class="keyword">char</span>* envp[])</span></span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Welcome to pwnable.kr\n"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Let's see if you know how to give input to program\n"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Just give me correct inputs then you will get the flag :)\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// argv</span></span><br><span class="line">	<span class="keyword">if</span>(argc != <span class="number">100</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">strcmp</span>(argv[<span class="string">'A'</span>],<span class="string">"\x00"</span>)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">strcmp</span>(argv[<span class="string">'B'</span>],<span class="string">"\x20\x0a\x0d"</span>)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Stage 1 clear!\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// stdio</span></span><br><span class="line">	<span class="keyword">char</span> buf[<span class="number">4</span>];</span><br><span class="line">	read(<span class="number">0</span>, buf, <span class="number">4</span>);</span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">memcmp</span>(buf, <span class="string">"\x00\x0a\x00\xff"</span>, <span class="number">4</span>)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	read(<span class="number">2</span>, buf, <span class="number">4</span>);</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">memcmp</span>(buf, <span class="string">"\x00\x0a\x02\xff"</span>, <span class="number">4</span>)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Stage 2 clear!\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// env</span></span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">strcmp</span>(<span class="string">"\xca\xfe\xba\xbe"</span>, getenv(<span class="string">"\xde\xad\xbe\xef"</span>))) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Stage 3 clear!\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// file</span></span><br><span class="line">	FILE* fp = fopen(<span class="string">"\x0a"</span>, <span class="string">"r"</span>);</span><br><span class="line">	<span class="keyword">if</span>(!fp) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>( fread(buf, <span class="number">4</span>, <span class="number">1</span>, fp)!=<span class="number">1</span> ) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>( <span class="built_in">memcmp</span>(buf, <span class="string">"\x00\x00\x00\x00"</span>, <span class="number">4</span>) ) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	fclose(fp);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Stage 4 clear!\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// network</span></span><br><span class="line">	<span class="keyword">int</span> sd, cd;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">saddr</span>, <span class="title">caddr</span>;</span></span><br><span class="line">	sd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span>(sd == <span class="number">-1</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"socket error, tell admin\n"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	saddr.sin_family = AF_INET;</span><br><span class="line">	saddr.sin_addr.s_addr = INADDR_ANY;</span><br><span class="line">	saddr.sin_port = htons( atoi(argv[<span class="string">'C'</span>]) );</span><br><span class="line">	<span class="keyword">if</span>(bind(sd, (struct sockaddr*)&amp;saddr, <span class="keyword">sizeof</span>(saddr)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"bind error, use another port\n"</span>);</span><br><span class="line">    		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	listen(sd, <span class="number">1</span>);</span><br><span class="line">	<span class="keyword">int</span> c = <span class="keyword">sizeof</span>(struct sockaddr_in);</span><br><span class="line">	cd = accept(sd, (struct sockaddr *)&amp;caddr, (<span class="keyword">socklen_t</span>*)&amp;c);</span><br><span class="line">	<span class="keyword">if</span>(cd &lt; <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"accept error, tell admin\n"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>( recv(cd, buf, <span class="number">4</span>, <span class="number">0</span>) != <span class="number">4</span> ) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">memcmp</span>(buf, <span class="string">"\xde\xad\xbe\xef"</span>, <span class="number">4</span>)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Stage 5 clear!\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// here's your flag</span></span><br><span class="line">	system(<span class="string">"/bin/cat flag"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就不做了8, 就当记录一下题. 继续看下一题</p>
+<h1 id="leg"><a href="#leg" class="headerlink" title="leg"></a>leg</h1><p>Daddy told me I should study arm.<br>But I prefer to study my leg!</p>
+<p>Download : <a href="http://pwnable.kr/bin/leg.c" target="_blank" rel="noopener">http://pwnable.kr/bin/leg.c</a><br>Download : <a href="http://pwnable.kr/bin/leg.asm" target="_blank" rel="noopener">http://pwnable.kr/bin/leg.asm</a></p>
+<p>ssh <a href="mailto:leg@pwnable.kr" target="_blank" rel="noopener">leg@pwnable.kr</a> -p2222 (pw:guest)</p>
+<h2 id="Solution-2"><a href="#Solution-2" class="headerlink" title="Solution"></a>Solution</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// leg.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">key1</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">asm</span>(<span class="string">"mov r3, pc\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">key2</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">asm</span>(</span><br><span class="line">	<span class="string">"push	&#123;r6&#125;\n"</span></span><br><span class="line">	<span class="string">"add	r6, pc, $1\n"</span></span><br><span class="line">	<span class="string">"bx	r6\n"</span></span><br><span class="line">	<span class="string">".code   16\n"</span></span><br><span class="line">	<span class="string">"mov	r3, pc\n"</span></span><br><span class="line">	<span class="string">"add	r3, $0x4\n"</span></span><br><span class="line">	<span class="string">"push	&#123;r3&#125;\n"</span></span><br><span class="line">	<span class="string">"pop	&#123;pc&#125;\n"</span></span><br><span class="line">	<span class="string">".code	32\n"</span></span><br><span class="line">	<span class="string">"pop	&#123;r6&#125;\n"</span></span><br><span class="line">	);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">key3</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">asm</span>(<span class="string">"mov r3, lr\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> key=<span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Daddy has very strong arm! : "</span>);</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;key);</span><br><span class="line">	<span class="keyword">if</span>( (key1()+key2()+key3()) == key )&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"Congratz!\n"</span>);</span><br><span class="line">		<span class="keyword">int</span> fd = open(<span class="string">"flag"</span>, O_RDONLY);</span><br><span class="line">		<span class="keyword">char</span> buf[<span class="number">100</span>];</span><br><span class="line">		<span class="keyword">int</span> r = read(fd, buf, <span class="number">100</span>);</span><br><span class="line">		write(<span class="number">0</span>, buf, r);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"I have strong leg :P\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disass main</span><br><span class="line">Dump of assembler code for function main:</span><br><span class="line">   0x00008d3c &lt;+0&gt;:	push	&#123;r4, r11, lr&#125;</span><br><span class="line">   0x00008d40 &lt;+4&gt;:	add	r11, sp, #8</span><br><span class="line">   0x00008d44 &lt;+8&gt;:	sub	sp, sp, #12</span><br><span class="line">   0x00008d48 &lt;+12&gt;:	mov	r3, #0</span><br><span class="line">   0x00008d4c &lt;+16&gt;:	str	r3, [r11, #-16]</span><br><span class="line">   0x00008d50 &lt;+20&gt;:	ldr	r0, [pc, #104]	; 0x8dc0 &lt;main+132&gt;</span><br><span class="line">   0x00008d54 &lt;+24&gt;:	bl	0xfb6c &lt;printf&gt;</span><br><span class="line">   0x00008d58 &lt;+28&gt;:	sub	r3, r11, #16</span><br><span class="line">   0x00008d5c &lt;+32&gt;:	ldr	r0, [pc, #96]	; 0x8dc4 &lt;main+136&gt;</span><br><span class="line">   0x00008d60 &lt;+36&gt;:	mov	r1, r3</span><br><span class="line">   0x00008d64 &lt;+40&gt;:	bl	0xfbd8 &lt;__isoc99_scanf&gt;</span><br><span class="line">   0x00008d68 &lt;+44&gt;:	bl	0x8cd4 &lt;key1&gt;</span><br><span class="line">   0x00008d6c &lt;+48&gt;:	mov	r4, r0</span><br><span class="line">   0x00008d70 &lt;+52&gt;:	bl	0x8cf0 &lt;key2&gt;</span><br><span class="line">   0x00008d74 &lt;+56&gt;:	mov	r3, r0</span><br><span class="line">   0x00008d78 &lt;+60&gt;:	add	r4, r4, r3</span><br><span class="line">   0x00008d7c &lt;+64&gt;:	bl	0x8d20 &lt;key3&gt;</span><br><span class="line">   0x00008d80 &lt;+68&gt;:	mov	r3, r0</span><br><span class="line">   0x00008d84 &lt;+72&gt;:	add	r2, r4, r3</span><br><span class="line">   0x00008d88 &lt;+76&gt;:	ldr	r3, [r11, #-16]</span><br><span class="line">   0x00008d8c &lt;+80&gt;:	cmp	r2, r3</span><br><span class="line">   0x00008d90 &lt;+84&gt;:	bne	0x8da8 &lt;main+108&gt;</span><br><span class="line">   0x00008d94 &lt;+88&gt;:	ldr	r0, [pc, #44]	; 0x8dc8 &lt;main+140&gt;</span><br><span class="line">   0x00008d98 &lt;+92&gt;:	bl	0x1050c &lt;puts&gt;</span><br><span class="line">   0x00008d9c &lt;+96&gt;:	ldr	r0, [pc, #40]	; 0x8dcc &lt;main+144&gt;</span><br><span class="line">   0x00008da0 &lt;+100&gt;:	bl	0xf89c &lt;system&gt;</span><br><span class="line">   0x00008da4 &lt;+104&gt;:	b	0x8db0 &lt;main+116&gt;</span><br><span class="line">   0x00008da8 &lt;+108&gt;:	ldr	r0, [pc, #32]	; 0x8dd0 &lt;main+148&gt;</span><br><span class="line">   0x00008dac &lt;+112&gt;:	bl	0x1050c &lt;puts&gt;</span><br><span class="line">   0x00008db0 &lt;+116&gt;:	mov	r3, #0</span><br><span class="line">   0x00008db4 &lt;+120&gt;:	mov	r0, r3</span><br><span class="line">   0x00008db8 &lt;+124&gt;:	sub	sp, r11, #8</span><br><span class="line">   0x00008dbc &lt;+128&gt;:	pop	&#123;r4, r11, pc&#125;</span><br><span class="line">   0x00008dc0 &lt;+132&gt;:	andeq	r10, r6, r12, lsl #9</span><br><span class="line">   0x00008dc4 &lt;+136&gt;:	andeq	r10, r6, r12, lsr #9</span><br><span class="line">   0x00008dc8 &lt;+140&gt;:			; &lt;UNDEFINED&gt; instruction: 0x0006a4b0</span><br><span class="line">   0x00008dcc &lt;+144&gt;:			; &lt;UNDEFINED&gt; instruction: 0x0006a4bc</span><br><span class="line">   0x00008dd0 &lt;+148&gt;:	andeq	r10, r6, r4, asr #9</span><br><span class="line">End of assembler dump.</span><br><span class="line">(gdb) disass key1</span><br><span class="line">Dump of assembler code for function key1:</span><br><span class="line">   0x00008cd4 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008cd8 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008cdc &lt;+8&gt;:	mov	r3, pc</span><br><span class="line">   0x00008ce0 &lt;+12&gt;:	mov	r0, r3</span><br><span class="line">   0x00008ce4 &lt;+16&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008ce8 &lt;+20&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008cec &lt;+24&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br><span class="line">(gdb) disass key2</span><br><span class="line">Dump of assembler code for function key2:</span><br><span class="line">   0x00008cf0 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008cf4 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008cf8 &lt;+8&gt;:	push	&#123;r6&#125;		; (str r6, [sp, #-4]!)</span><br><span class="line">   0x00008cfc &lt;+12&gt;:	add	r6, pc, #1</span><br><span class="line">   0x00008d00 &lt;+16&gt;:	bx	r6</span><br><span class="line">   0x00008d04 &lt;+20&gt;:	mov	r3, pc</span><br><span class="line">   0x00008d06 &lt;+22&gt;:	adds	r3, #4</span><br><span class="line">   0x00008d08 &lt;+24&gt;:	push	&#123;r3&#125;</span><br><span class="line">   0x00008d0a &lt;+26&gt;:	pop	&#123;pc&#125;</span><br><span class="line">   0x00008d0c &lt;+28&gt;:	pop	&#123;r6&#125;		; (ldr r6, [sp], #4)</span><br><span class="line">   0x00008d10 &lt;+32&gt;:	mov	r0, r3</span><br><span class="line">   0x00008d14 &lt;+36&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008d18 &lt;+40&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008d1c &lt;+44&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br><span class="line">(gdb) disass key3</span><br><span class="line">Dump of assembler code for function key3:</span><br><span class="line">   0x00008d20 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008d24 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008d28 &lt;+8&gt;:	mov	r3, lr</span><br><span class="line">   0x00008d2c &lt;+12&gt;:	mov	r0, r3</span><br><span class="line">   0x00008d30 &lt;+16&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008d34 &lt;+20&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008d38 &lt;+24&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>从零开刷PWNABLE.KR系列-random</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/03/04 12:00:00</p>
+<p><span>更新时间：</span>2019/03/25 09:37:19</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/03/04/从零开刷PWNABLE.KR系列-random/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#random"><span class="toc-number">1.</span> <span class="toc-text">random</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#input"><span class="toc-number">2.</span> <span class="toc-text">input</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-1"><span class="toc-number">2.1.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#leg"><span class="toc-number">3.</span> <span class="toc-text">leg</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-2"><span class="toc-number">3.1.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

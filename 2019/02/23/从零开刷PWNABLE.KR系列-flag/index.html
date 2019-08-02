@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>从零开刷PWNABLE.KR系列-flag | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>从零开刷PWNABLE.KR系列-flag</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年02月23日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#CTF" class='tag'>CTF</a>
+
+  <a href="/tags/#PWN" class='tag'>PWN</a>
+
+  <a href="/tags/#PWNABLE.KR" class='tag'>PWNABLE.KR</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月25日</time>
+          </div>
+          
+          <p>啊最近最毕设, 各种看RFC文档熟悉协议, 真的头大, 偷懒刷下题.</p>
+<h1 id="flag"><a href="#flag" class="headerlink" title="flag"></a>flag</h1><p>Papa brought me a packed present! let’s open it.</p>
+<p>Download : <a href="http://pwnable.kr/bin/flag" target="_blank" rel="noopener">http://pwnable.kr/bin/flag</a></p>
+<p>This is reversing task. all you need is binary</p>
+<h2 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h2><p>题目提示需要逆向, 只给了一个binary. 下载下来之后, 先跑一下, 输出<code>I will malloc() and strcpy the flag there. take it.</code>之后就退出了, flag呢? 心想事情并没有这么简单, 于是拖进IDA. IDA打开之后, 发现左边函数窗口函数很少, 只有四个. 并且只有start函数可以反编译， 其他函数都是汇编代码, 也不知道在做什么. 除此之外,  <code>import</code>的函数数量也为0. 之后在<code>strings</code>窗口看到<code>upx.sf.net</code>的字样, 于是去google了一下, 原来是一种可执行文件打包程序.</p>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/img/20190223171550.png" alt="20190223171550.png"></p>
+<p>没深究原理, 以后在慢慢学吧(狗头). 在<a href="https://linux.die.net/man/1/upx" target="_blank" rel="noopener">这里</a>找到了unpack的工具, 直接<code>apt get</code>安装之后<code>-d</code>一把梭就得到了没有压缩的binary, 终于又可以开心的动态调试了.</p>
+<p>gdb打开, 反汇编<code>main</code>函数, 发现程序逻辑还是很简单的, 也就是程序一开始输出的那句话的意思, <code>I will malloc() and strcpy the flag there. take it.</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">gef➤  disass main</span><br><span class="line">Dump of assembler code <span class="keyword">for</span> <span class="keyword">function</span> main:</span><br><span class="line">   0x0000000000401164 &lt;+0&gt;:	push   rbp</span><br><span class="line">   0x0000000000401165 &lt;+1&gt;:	mov    rbp,rsp</span><br><span class="line">   0x0000000000401168 &lt;+4&gt;:	sub    rsp,0x10</span><br><span class="line">   0x000000000040116c &lt;+8&gt;:	mov    edi,0x496658</span><br><span class="line">   0x0000000000401171 &lt;+13&gt;:	call   0x402080 &lt;puts&gt;</span><br><span class="line">   0x0000000000401176 &lt;+18&gt;:	mov    edi,0x64</span><br><span class="line">   0x000000000040117b &lt;+23&gt;:	call   0x4099d0 &lt;malloc&gt;</span><br><span class="line">   0x0000000000401180 &lt;+28&gt;:	mov    QWORD PTR [rbp-0x8],rax</span><br><span class="line">   0x0000000000401184 &lt;+32&gt;:	mov    rdx,QWORD PTR [rip+0x2c0ee5]        <span class="comment"># 0x6c2070 &lt;flag&gt;</span></span><br><span class="line">   0x000000000040118b &lt;+39&gt;:	mov    rax,QWORD PTR [rbp-0x8]</span><br><span class="line">   0x000000000040118f &lt;+43&gt;:	mov    rsi,rdx</span><br><span class="line">   0x0000000000401192 &lt;+46&gt;:	mov    rdi,rax</span><br><span class="line">   0x0000000000401195 &lt;+49&gt;:	call   0x400320</span><br><span class="line">   0x000000000040119a &lt;+54&gt;:	mov    eax,0x0</span><br><span class="line">   0x000000000040119f &lt;+59&gt;:	leave</span><br><span class="line">   0x00000000004011a0 &lt;+60&gt;:	ret</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+<p>可以看出<code>main+0x401195</code>处的函数<code>0x400320</code>应该就是最后调用的<code>strcpy</code>函数, 在这里下个断点, 岂不是就可以让<code>flag</code>现原形了? 说着就干, 两条命令一翘, <code>run</code>！ 发现<code>flag</code>就乖乖出来了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0x400320 (</span><br><span class="line">   <span class="variable">$rdi</span> = 0x00000000006c96b0 → 0x0000000000000000,</span><br><span class="line">   <span class="variable">$rsi</span> = 0x0000000000496628 → <span class="string">"UPX...? sounds like a delivery service :)"</span>,</span><br><span class="line">   <span class="variable">$rdx</span> = 0x0000000000496628 → <span class="string">"UPX...? sounds like a delivery service :)"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><code>strcpy</code>的<code>source</code>参数即<code>rsi</code>寄存器中, 就是我们要的flag.</p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>从零开刷PWNABLE.KR系列-flag</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/02/23 12:00:00</p>
+<p><span>更新时间：</span>2019/02/25 03:13:26</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/02/23/从零开刷PWNABLE.KR系列-flag/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#flag"><span class="toc-number">1.</span> <span class="toc-text">flag</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

