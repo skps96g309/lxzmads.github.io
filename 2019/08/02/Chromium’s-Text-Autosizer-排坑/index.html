@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>Chromium’s Text Autosizer 排坑 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>Chromium’s Text Autosizer 排坑</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年08月02日</time>
+            
+            
+              | 
+                  <i class="fa fa-tags" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#排坑" class='tag'>排坑</a>
+
+  <a href="/tags/#前端" class='tag'>前端</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月02日</time>
+          </div>
+          
+          <p>闲来无事，想把丑陋的博客“整下容”。本来轻松愉快的改CSS，改的逍遥自在啊，直到发生了这件事。。。不想听我讲故事的直接到<a href="#总结">总结</a>即可。</p>
+<h1 id="咦，难道我写bug了？"><a href="#咦，难道我写bug了？" class="headerlink" title="咦，难道我写bug了？"></a>咦，难道我写bug了？</h1><p>二零一九年八月二日的一个炎热的午后，辛苦了改了一天的我正准备调整一下最后的手机上的响应式布局相关的CSS代码。当我满心欢喜的改完之后打开我的Safari预览时，咦？怎么这两块的字体怎么一大一小？大概是下面这个样子：</p>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/D377F564EED3F0D2C3C6D525E9726570.png" alt="D377F564EED3F0D2C3C6D525E9726570.png"></p>
+<p>这两个地方都是显示代码块的地方，为什么一个那么大，一个却正常？我当时眉头一紧，觉得可能CSS写的有问题。然而转念一想（其实调了好久，大约两个小时，最后还动用了一个远程调试的tool），不对呀。CSS针对的也不是位置啊，而是对标签的样式行为进行定义，然而这两块按理说都是一样的标签，从而也就是一样的CSS了。</p>
+<h1 id="折磨"><a href="#折磨" class="headerlink" title="折磨"></a>折磨</h1><p>在苦苦思考不得而知的时候，我开始想起了求助某个全栈大佬，心想他写CSS比我熟练，可能知道些什么。然鹅经过一番QQ交谈，最终以“玄学”、“神奇”等词汇告终。然而此番交谈我得到了以下信息：</p>
+<ul>
+<li>在大佬的安卓机子上的浏览器（可能是firefox或者自带的）和QQ里面的浏览器打开，显示是正常的。</li>
+<li>大佬也帮我检查了一下CSS，确实是没有问题的。</li>
+<li>我随口分析时说，这两个地方除了内容，真的没什么不一样了（除了时空理论别和我杠=w=）。</li>
+</ul>
+<h1 id="拨云见雾"><a href="#拨云见雾" class="headerlink" title="拨云见雾"></a>拨云见雾</h1><p>于是，利用仅有的这些信息，我开始疯狂在浏览器里面fuzz。关键词组合太多这里就不列举了。最终利用如下关键词搜到了有用信息：</p>
+<ul>
+<li>css 字体变大（别笑！）</li>
+</ul>
+<p>全英文检索还真搜不到什么hhh。</p>
+<p>搜到的是CSDN一位小哥一年前的记录，链接在<a href="https://blog.csdn.net/weixin_42034412/article/details/80462099" target="_blank" rel="noopener">这里</a>，通过他的博客我继续检索关键字<code>Text Autosizer</code>找到了以下有用的信息。</p>
+<ul>
+<li><a href="https://github.com/ccchangkong/article/issues/20" target="_blank" rel="noopener">Github一位小哥的分析</a></li>
+<li><a href="https://docs.google.com/document/d/1PPcEwAhXJJ1TQShor29KWB17KJJq7UJOM34oHwYP3Zg/edit#heading=h.si6prvoucj2z" target="_blank" rel="noopener">官方文档</a></li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>于是总结一下就是：</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在做webkit内核的移动端页面的时候，会发现某些字体会自动放大，放大的比例以及放大的时机看上去还没啥规律，很是诡异。</p>
+<h2 id="原因及解决方案"><a href="#原因及解决方案" class="headerlink" title="原因及解决方案"></a>原因及解决方案</h2><ul>
+<li>原因</li>
+</ul>
+<p>不是bug，是Chromium内核提高移动端文本可读性的一个特性，叫做这个特性被称做「Text Autosizer」，又称「Font Boosting」、「Font Inflation」</p>
+<ul>
+<li>解决</li>
+</ul>
+<ol>
+<li>限定元素宽高</li>
+<li>设置<code>-webkit-text-size-adjust: none;</code></li>
+</ol>
+<p>最后借用下老哥的图。</p>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/687474703a2f2f7777312e73696e61696d672e636e2f6c617267652f36633762666231326777316638743067693064686f6a3230647230676f6a736f2e6a7067.jpeg" alt="687474703a2f2f7777312e73696e61696d672e636e2f6c617267652f36633762666231326777316638743067693064686f6a3230647230676f6a736f2e6a7067.jpeg"></p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>Chromium’s Text Autosizer 排坑</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/08/02 07:50:31</p>
+<p><span>更新时间：</span>2019/08/02 09:01:33</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/08/02/Chromium’s-Text-Autosizer-排坑/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#咦，难道我写bug了？"><span class="toc-number">1.</span> <span class="toc-text">咦，难道我写bug了？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#折磨"><span class="toc-number">2.</span> <span class="toc-text">折磨</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#拨云见雾"><span class="toc-number">3.</span> <span class="toc-text">拨云见雾</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题描述"><span class="toc-number">4.1.</span> <span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原因及解决方案"><span class="toc-number">4.2.</span> <span class="toc-text">原因及解决方案</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: '6b81331560c108209346bc4807a5126da190e14c',
+  repo: 'blogcomments',
+  owner: 'lxzmads',
+  admin: ['lxzmads'],
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lewis-geek/hexo-theme-Aath" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>

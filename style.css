@@ -221,7 +221,7 @@ header {
 .aath-body {
   font-family: ibm-plex-sans, Georgia, 'Microsoft Yahei', sans-serif;
   font-size: 16px;
-  line-height: 180%;
+  line-height: 1.5;
   word-wrap: break-word; }
   .aath-body a {
     color: #0366d6; }
@@ -517,11 +517,12 @@ header {
         height: 17px; }
     .aath-body .highlight table .gutter pre {
       padding-right: 0;
+      padding-left: 0;
       color: #707070;
+      min-width: 40px;
       text-align: right; }
     .aath-body .highlight table .gutter .line {
       margin: 0;
-      line-height: 1.2;
       padding-right: 5px;
       border-right: 3px solid #6190e8 !important; }
     .aath-body .highlight table .code {
@@ -531,6 +532,11 @@ header {
     word-break: normal; }
   .aath-body .highlight pre,
   .aath-body pre {
+    /* 
+    NO MORE Text Autosizer !!!
+    https://docs.google.com/document/d/1PPcEwAhXJJ1TQShor29KWB17KJJq7UJOM34oHwYP3Zg/edit
+    */
+    -webkit-text-size-adjust: none;
     padding: 16px;
     overflow: auto;
     font-size: 85%;
