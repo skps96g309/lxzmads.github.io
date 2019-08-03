@@ -113,8 +113,10 @@ header {
     box-sizing: border-box; } }
 
 @media (max-width: 700px) {
-  #archive .content {
-    width: 100%; } }
+  #archive {
+    padding: 0; }
+    #archive .content {
+      width: 100%; } }
 
 #post .content article {
   width: 72%;
@@ -759,10 +761,15 @@ header {
       order: 0; }
       #index aside > div {
         margin-left: 0; }
-  .paging .paging-container {
-    width: 100%; }
-    .paging .paging-container .page-next {
-      margin-right: 0; } }
+  .paging {
+    padding-right: 0;
+    padding-left: 0; }
+    .paging .paging-container {
+      width: 100%; }
+      .paging .paging-container .page-next {
+        margin-right: 4%; }
+      .paging .paging-container .page-prev {
+        margin-left: 4%; } }
 
 #tags .tags-container {
   width: 100%;
@@ -829,5 +836,7 @@ header {
     width: 1000px; } }
 
 @media (max-width: 700px) {
-  #tags .tags-container {
-    width: 100%; } }
+  #tags {
+    padding: 0; }
+    #tags .tags-container {
+      width: 100%; } }
