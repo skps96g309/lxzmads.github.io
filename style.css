@@ -3,7 +3,7 @@ html {
   background-color: #f4f5f5; }
 
 body {
-  font-family: ibm-plex-sans, Georgia, 'Microsoft Yahei', sans-serif;
+  font-family: ibm-plex-sans,"Helvetica Neue",Arial,sans-serif;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@ footer .copyright {
   color: #BABABA;
   justify-content: center; }
   footer .copyright a:hover {
-    color: #6190e8; }
+    color: #007670; }
 
 header {
   background: #fff;
@@ -47,7 +47,7 @@ header {
     align-items: center;
     height: 60px; }
     header .header-container .logo {
-      color: #6190e8;
+      color: #007670;
       padding-left: 2%; }
     header .header-container .right-header {
       margin: 0;
@@ -59,7 +59,7 @@ header {
         header .header-container .right-header li:last-child {
           padding-right: 25px; }
       header .header-container .right-header .nav-item .active {
-        color: #6190e8; }
+        color: #007670; }
 
 @media (max-width: 700px) {
   header .header-container {
@@ -105,7 +105,7 @@ header {
           font-weight: normal;
           transition: 0.3s color; }
           #archive .content .year-list ul li a:hover {
-            color: #6190e8; }
+            color: #007670; }
 
 @media (max-width: 1032px) {
   #archive {
@@ -148,13 +148,13 @@ header {
   font-weight: 200;
   color: #6E7173;
   margin-bottom: 11px;
-  font-family: "SF Pro SC","SF Pro Text","SF Pro Icons","PingFang SC","Helvetica Neue","Helvetica","Arial",sans-serif; }
+  font-family: ibm-plex-sans,"Helvetica Neue",Arial,sans-serif; }
   #post .content .post-meta a {
     color: #404040;
     font-size: 14px;
     font-weight: 200; }
     #post .content .post-meta a:hover {
-      color: #6190e8; }
+      color: #007670; }
 
 #post > .content {
   width: 72%; }
@@ -177,9 +177,10 @@ header {
       box-sizing: border-box;
       border-bottom: 1px solid rgba(178, 186, 194, 0.15);
       font-weight: normal;
-      color: #909090; }
+      color: #777677; }
     #post aside .toc-container .content {
       padding: 20px;
+      color: #666666;
       font-size: 1em;
       line-height: 2; }
     #post aside .toc-container ol {
@@ -196,7 +197,7 @@ header {
       #post aside .toc-container ol a {
         transition: 0.3s color; }
         #post aside .toc-container ol a:hover, #post aside .toc-container ol a.active {
-          color: #6190e8; }
+          color: #007670; }
 
 @media (max-width: 1032px) {
   #post {
@@ -215,18 +216,18 @@ header {
       #post aside .toc-container {
         margin-left: 0; }
         #post aside .toc-container ol a.active {
-          color: #909090; }
+          color: #007670; }
       #post aside > div {
         margin-left: 0;
         margin-bottom: 15px; } }
 
 .aath-body {
-  font-family: ibm-plex-sans, Georgia, 'Microsoft Yahei', sans-serif;
+  font-family: ibm-plex-sans,"Helvetica Neue",Arial,sans-serif;
   font-size: 16px;
   line-height: 1.5;
   word-wrap: break-word; }
   .aath-body a {
-    color: #0366d6; }
+    color: #007670; }
   .aath-body figure {
     margin: 0; }
     .aath-body figure table {
@@ -312,7 +313,7 @@ header {
   .aath-body h4 .octicon-link,
   .aath-body h5 .octicon-link,
   .aath-body h6 .octicon-link {
-    color: #1b1f23;
+    color: #4a4a4a;
     vertical-align: middle;
     visibility: hidden; }
   .aath-body h1:hover .anchor,
@@ -526,7 +527,7 @@ header {
     .aath-body .highlight table .gutter .line {
       margin: 0;
       padding-right: 5px;
-      border-right: 3px solid #6190e8 !important; }
+      border-right: 3px solid #007670 !important; }
     .aath-body .highlight table .code {
       vertical-align: top; }
   .aath-body .highlight pre {
@@ -545,7 +546,7 @@ header {
     line-height: 1.2;
     background-color: #ffffff;
     border-radius: 3px;
-    font-family: ibm-plex-mono,Menlo,"DejaVu Sans Mono","Bitstream Vera Sans Mono",Courier,monospace; }
+    font-family: ibm-plex-sans,"Helvetica Neue",Arial,sans-serif; }
   .aath-body pre code,
   .aath-body pre tt {
     display: inline;
@@ -638,11 +639,12 @@ header {
     #index .posts-list section a {
       color: #404040; }
       #index .posts-list section a:hover {
-        color: #6190e8; }
+        color: #007670; }
       #index .posts-list section a h3 {
         margin: 0 0 5px;
         font-size: 25px;
         font-weight: 700;
+        color: #4a4a4a;
         transition: 0.3s color; }
     #index .posts-list section .post-img {
       margin-bottom: 5px;
@@ -692,7 +694,7 @@ header {
         color: #909090;
         transition: 0.3s color; }
         #index aside > div > .content a:hover {
-          color: #6190e8; }
+          color: #007670; }
   #index aside .search form input {
     background: #fff 8px 9px no-repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6%2BR8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAG11AABzoAAA%2FN0AAINkAABw6AAA7GgAADA%2BAAAQkOTsmeoAAAESSURBVHjajNCxS9VRGMbxz71E4OwgoXPQxVEpXCI47%2BZqGP0LCoJO7UVD3QZzb3SwcHB7F3Uw3Zpd%2FAPCcJKG7Dj4u%2FK7Pwp94HDg5Xyf5z1Pr9YKImKANTzFXxzjU2ae6qhXaxURr%2FAFl9hHDy%2FwEK8z89sYVEp5gh84wMvMvGiSJ%2FEV85jNzLMR1McqfmN5BEBmnmMJFSvtpH7jdJiZv7q7Z%2BZPfMdcF6rN%2FT%2F1m2LGBkd4HhFT3dcRMY2FpskxaLNpayciHrWAGeziD7b%2BVfkithuTk8bkGa4wgWFmbrSTZOYeBvjc%2BucQj%2FEe6xHx4Taq1nrnKaW8K6XUUsrHWuvNevdRRLzFGwzvDbXAB9cDAHvhedDruuxSAAAAAElFTkSuQmCC);
     padding: 7px 11px 7px 28px;
@@ -796,14 +798,14 @@ header {
     #tags .tags .tag:hover,
     #tags .tags .tag:active {
       color: white;
-      border-color: #6190e8;
-      background-color: #6190e8; }
+      border-color: #007670;
+      background-color: #007670; }
 
 #tags .tag-list {
   padding: 20px 25px 15px;
   border-bottom: 1px solid rgba(178, 186, 194, 0.15); }
   #tags .tag-list .listing-seperator {
-    color: #6190e8; }
+    color: #007670; }
     #tags .tag-list .listing-seperator .tag-text {
       font-weight: 200;
       line-height: 1.7; }
@@ -813,7 +815,7 @@ header {
       color: #404040;
       transition: 0.3s color; }
       #tags .tag-list .post-preview h2.post-title:hover {
-        color: #6190e8; }
+        color: #007670; }
 
 #tags .post-preview {
   position: relative; }
