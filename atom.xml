@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://lxzmads.github.io/"/>
-  <updated>2019-08-20T02:18:49.216Z</updated>
+  <updated>2019-08-20T02:26:05.869Z</updated>
   <id>http://lxzmads.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://lxzmads.github.io/2019/08/20/%E8%AE%B0SUCTF2019%E4%B8%80%E9%81%93%E7%AE%80%E5%8D%95%E7%9A%84sqli/"/>
     <id>http://lxzmads.github.io/2019/08/20/记SUCTF2019一道简单的sqli/</id>
     <published>2019-08-20T01:40:40.000Z</published>
-    <updated>2019-08-20T02:18:49.216Z</updated>
+    <updated>2019-08-20T02:26:05.869Z</updated>
     
     <content type="html"><![CDATA[<p>这道题算是一道很CTF的注入题了吧（不知道线上哪里会出现此类情况）。</p><h1 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h1><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820094338.png" alt="20190820094338.png"></p><p>这道题后来貌似被玩坏了，中间有一段时间疯狂被交<code>flag</code>，原因是那时候输入非0数字就会返回<code>flag</code>，狗头。</p><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820100706.png" alt="20190820100706.png"></p><p>之前正常的时候是输入<code>0</code>返回<code>0</code>，输入其他数字返回<code>1</code>.</p><h1 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h1><p>跑了一下mysql相关的字典找一下过滤，发现过滤非常严格。</p><ul><li>过滤了<code>or</code>，导致没法用<code>or</code>不说，还没法查<code>information_schema</code>, 也就没法查列名。</li><li>发现可以用<code>show talbes</code>等查出数据库为<code>CTF</code>, 表名为<code>Flag</code>, 但是紧接着发现<code>flag</code>关键字也被过滤</li><li><code>select</code>没有被过滤，但是<code>from</code>被过滤了，所以根本就没法跨表查询，断了这条路，利用函数吧。</li><li>一些基本的函数如<code>database()</code>,<code>user()</code>,<code>version()</code>等都可以用。发现版本是<code>5.5.44-0ubuntu0.14.04.1-log</code>，好像比较低，可以用file相关操作。</li><li>发现可以<code>load_file()</code>,但是单引号貌似被<code>addslashes</code>了，双引号也被过滤了。想到利用编码绕过，成功读到了<code>/etc/passwd</code>文件。</li><li>尝试读<code>/var/www/html/index.php</code>文件时，发现提示<code>too long</code>，还有长度限制。测试了一下，发现长度限制时<code>40</code>。简单计算了一下，我可以读的文件编码前文件名大概只能有<code>13</code>个字符，<code>/var/www/html/index.php</code>妥妥的超了。</li><li>这里想了很久，一般绕长度限制就是用变量呗。查了一下<code>mysql</code>变量有两种，一种只在一次查询会话有效相当于临时变量，还有一种是全局变量。可以尝试利用全局变量存储长字符串，然后调用变量名绕过长度限制。想法很美好，但是现实是残酷的。这些全局变量名字都非常长，调用语句也没有那么短。这条路也没戏了。</li><li>中间当然也发现了可以用<code>exp</code>等函数盲注，但是表名被过滤了，列名不知道，也过滤了<code>from</code>，还只能写<code>40</code>个字符，盲注个头。</li><li>也发现了可以写多语句，但是发现<code>prepare</code>被过滤了，好像也没法用了吧。。坑是真的多。</li><li>这里感觉是没法做了，但是还是要善于观察。（对于有些师傅全天24小时扫管理员<code>.swp</code>文件然后拿到了源码的师傅，小弟实在是佩服，狗头）</li><li>观察会发现当输入数字<code>0</code>的时候，返回的是<code>0</code>。（题目没挂之前）输入其他数字都返回了<code>1</code>。通过输入输出我们可以简单猜一下sql语句的逻辑。这里假设列名是<code>flag</code>。sql语句可能是<code>select {输入} != flag from Flag</code>，这也是我当时猜的。后来看到师傅们的源码，真是情况是<code>select {输入} || flag from Flag</code>也差不多。到这里其实相对明了了。过滤了那么多花里胡哨的关键字，所以根本就没想让你注进来，而就是简单的让你猜一下sql语句，也算是个思路开拓题吧。</li><li>于是我们构造输入为<code>*,1</code>,构成sql查询为<code>select *,1||flag from Flag</code>，即可获取flag。</li></ul><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820101230.png" alt="20190820101230.png"></p>]]></content>
     
@@ -35,6 +35,8 @@
     
     </summary>
     
+    
+      <category term="SQL" scheme="http://lxzmads.github.io/tags/SQL/"/>
     
   </entry>
   
