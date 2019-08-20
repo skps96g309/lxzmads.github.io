@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>记SUCTF2019一道简单的sqli | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>记SUCTF2019一道简单的sqli</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年08月20日</time>
+            
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月20日</time>
+          </div>
+          
+          <p>这道题算是一道很CTF的注入题了吧（不知道线上哪里会出现此类情况）。</p>
+<h1 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h1><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820094338.png" alt="20190820094338.png"></p>
+<p>这道题后来貌似被玩坏了，中间有一段时间疯狂被交<code>flag</code>，原因是那时候输入非0数字就会返回<code>flag</code>，狗头。</p>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820100706.png" alt="20190820100706.png"></p>
+<p>之前正常的时候是输入<code>0</code>返回<code>0</code>，输入其他数字返回<code>1</code>.</p>
+<h1 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h1><p>跑了一下mysql相关的字典找一下过滤，发现过滤非常严格。</p>
+<ul>
+<li>过滤了<code>or</code>，导致没法用<code>or</code>不说，还没法查<code>information_schema</code>, 也就没法查列名。</li>
+<li>发现可以用<code>show talbes</code>等查出数据库为<code>CTF</code>, 表名为<code>Flag</code>, 但是紧接着发现<code>flag</code>关键字也被过滤</li>
+<li><code>select</code>没有被过滤，但是<code>from</code>被过滤了，所以根本就没法跨表查询，断了这条路，利用函数吧。</li>
+<li>一些基本的函数如<code>database()</code>,<code>user()</code>,<code>version()</code>等都可以用。发现版本是<code>5.5.44-0ubuntu0.14.04.1-log</code>，好像比较低，可以用file相关操作。</li>
+<li>发现可以<code>load_file()</code>,但是单引号貌似被<code>addslashes</code>了，双引号也被过滤了。想到利用编码绕过，成功读到了<code>/etc/passwd</code>文件。</li>
+<li>尝试读<code>/var/www/html/index.php</code>文件时，发现提示<code>too long</code>，还有长度限制。测试了一下，发现长度限制时<code>40</code>。简单计算了一下，我可以读的文件编码前文件名大概只能有<code>13</code>个字符，<code>/var/www/html/index.php</code>妥妥的超了。</li>
+<li>这里想了很久，一般绕长度限制就是用变量呗。查了一下<code>mysql</code>变量有两种，一种只在一次查询会话有效相当于临时变量，还有一种是全局变量。可以尝试利用全局变量存储长字符串，然后调用变量名绕过长度限制。想法很美好，但是现实是残酷的。这些全局变量名字都非常长，调用语句也没有那么短。这条路也没戏了。</li>
+<li>中间当然也发现了可以用<code>exp</code>等函数盲注，但是表名被过滤了，列名不知道，也过滤了<code>from</code>，还只能写<code>40</code>个字符，盲注个头。</li>
+<li>也发现了可以写多语句，但是发现<code>prepare</code>被过滤了，好像也没法用了吧。。坑是真的多。</li>
+<li>这里感觉是没法做了，但是还是要善于观察。（对于有些师傅全天24小时扫管理员<code>.swp</code>文件然后拿到了源码的师傅，小弟实在是佩服，狗头）</li>
+<li>观察会发现当输入数字<code>0</code>的时候，返回的是<code>0</code>。（题目没挂之前）输入其他数字都返回了<code>1</code>。通过输入输出我们可以简单猜一下sql语句的逻辑。这里假设列名是<code>flag</code>。sql语句可能是<code>select {输入} != flag from Flag</code>，这也是我当时猜的。后来看到师傅们的源码，真是情况是<code>select {输入} || flag from Flag</code>也差不多。到这里其实相对明了了。过滤了那么多花里胡哨的关键字，所以根本就没想让你注进来，而就是简单的让你猜一下sql语句，也算是个思路开拓题吧。</li>
+<li>于是我们构造输入为<code>*,1</code>,构成sql查询为<code>select *,1||flag from Flag</code>，即可获取flag。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/20190820101230.png" alt="20190820101230.png"></p>
+
+          
+<div class="post-copyright">
+<p><span>本文标题：</span>记SUCTF2019一道简单的sqli</p>
+<p><span>文章作者：</span>Mads</p>
+<p><span>发布时间：</span>2019/08/20 09:40:40</p>
+<p><span>更新时间：</span>2019/08/20 10:18:49</p>
+<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2019/08/20/记SUCTF2019一道简单的sqli/</a></p>
+<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
+</div>
+ 
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Description"><span class="toc-number">1.</span> <span class="toc-text">Description</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Solution"><span class="toc-number">2.</span> <span class="toc-text">Solution</span></a></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: "6b81331560c108209346bc4807a5126da190e14c",
+  repo: "blogcomments",
+  owner: "lxzmads",
+  admin: "lxzmads",
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: "false"  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lxzmads/hexo-theme-Aath-magic" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
