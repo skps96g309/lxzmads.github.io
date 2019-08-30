@@ -121,16 +121,7 @@
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 证明脚本 注意版本是 7.0.x */</span></span><br><span class="line">$seed = <span class="number">3559020430</span>;</span><br><span class="line">mt_srand($seed);</span><br><span class="line">gen_rand(<span class="number">8</span>);</span><br><span class="line">$key = gen_rand(<span class="number">32</span>);<span class="comment">//'r9BsGsvcNnY8jYA5XD9rUgY2hpSiTMcp';</span></span><br><span class="line">$m = <span class="string">'e47dc5Sjdiy/O1aTX0nOjboCI3qdNljrSkHZ33lFSqb9mFnMU5j6pv7qSUGLI4vX9dk'</span>;</span><br><span class="line"><span class="keyword">echo</span> authcode($m, <span class="string">'DECODE'</span>, $key); <span class="comment">// filename=35hGm34y.php</span></span><br></pre></td></tr></table></figure>
 <p>我们得到了任意文件下载权限！ 于是我把所有已知文件名的文件全下载下来了, 没有找到flag. 但我很快想到了应该不会藏在太刁钻的地方, 于是用我试了下<code>/flag</code>这个路径, 果然, 拿到了flag. </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;69639776-2e53-45ab-8664-deb8941ab4c5&#125;</span><br></pre></td></tr></table></figure>
-          
-<div class="post-copyright">
-<p><span>本文标题：</span>福建省2018百越杯线上赛部分题解</p>
-<p><span>文章作者：</span>Mads</p>
-<p><span>发布时间：</span>2018/12/02 12:00:00</p>
-<p><span>更新时间：</span>2019/02/17 04:05:38</p>
-<p><span>原始链接：</span><a style="color: #bababa" href=" + data.permalink + ">http://lxzmads.github.io/2018/12/02/福建省2018百越杯线上赛部分题解/</a></p>
-<p><span>许可协议：</span><i class="fab fa-creative-commons"></i><a rel="license" style="color: #bababa" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a><span class="warn">转载请保留原文链接及作者</span></p>
-</div>
- 
+           
         </section>
     </article>
     

