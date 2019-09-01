@@ -19,13 +19,13 @@ main {
   flex-grow: 1;
   display: flex;
   justify-content: space-evenly;
-  padding: 0 10% 0 12%; }
+  padding: 0 12% 0 14%; }
 
 .article-category {
   display: inline-block; }
 
 footer .copyright {
-  padding: 0 10% 0 12%;
+  padding: 0 12% 0 14%;
   display: flex;
   line-height: 3em;
   font-size: 0.7rem;
@@ -36,19 +36,16 @@ footer .copyright {
 
 header {
   background: #fff;
-  border-bottom: 1px solid #f1f1f1;
   color: #909090;
   margin-bottom: 15px; }
   header .header-container {
-    padding: 0 10% 0 12%;
+    padding: 0 12% 0 17.5%;
     display: flex;
-    font-size: 1.15em;
     justify-content: space-between;
     align-items: center;
     height: 60px; }
     header .header-container .logo {
-      color: #007670;
-      padding-left: 2%; }
+      color: #007670; }
     header .header-container .right-header {
       margin: 0;
       padding: 0; }
@@ -88,7 +85,7 @@ header {
     border-bottom: 1px solid rgba(178, 186, 194, 0.15); }
     #archive .content .year-list h3 {
       margin: 0 0 5px;
-      color: #404040;
+      color: #666666;
       font-size: 25px; }
     #archive .content .year-list ul {
       margin: 0;
@@ -723,7 +720,7 @@ header {
     display: block; }
 
 .paging {
-  padding: 0 10% 0 12%;
+  padding: 0 12% 0 14%;
   padding-top: 1em; }
   .paging .paging-container {
     display: flex;
