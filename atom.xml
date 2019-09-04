@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Mads Blog</title>
   
-  
+  <subtitle>为了美好的存在而坚持</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://lxzmads.github.io/"/>
